@@ -13,7 +13,7 @@ class Individual:
         self.relationships = {}  # Relationships with other individuals
         self.life_events = []  # List of significant life events
         self.is_alive = True
-        print(f"👤 {name}, a {species}, has entered the universe. May their story be interesting!")
+        print(f"{name}, a {species}, has entered the universe. Story begins.")
 
     def age(self) -> int:
         current_date = datetime.now()
@@ -21,34 +21,34 @@ class Individual:
 
     def set_luck(self, value: int) -> None:
         self.luck = max(0, min(100, value))  # Ensure luck stays between 0 and 100
-        print(f"🍀 {self.name}'s luck has been set to {self.luck}. Let's see how it plays out!")
+        print(f"{self.name}'s luck has been set to {self.luck}.")
 
     def add_fate_event(self, event: str, age: int) -> None:
         self.fate[age] = event
-        print(f"🔮 A new fate has been written for {self.name}: At age {age}, {event}")
+        print(f"A new fate has been written for {self.name}: At age {age}, {event}")
 
     def add_skill(self, skill: str, level: int) -> None:
         self.skills[skill] = level
-        print(f"🌟 {self.name} has gained the skill: {skill} at level {level}")
+        print(f"{self.name} has gained the skill: {skill} at level {level}")
 
     def improve_skill(self, skill: str, improvement: int) -> None:
         if skill in self.skills:
             self.skills[skill] += improvement
-            print(f"📈 {self.name}'s {skill} skill has improved by {improvement} to level {self.skills[skill]}")
+            print(f"{self.name}'s {skill} skill has improved by {improvement} to level {self.skills[skill]}")
         else:
-            print(f"❓ {self.name} doesn't have the {skill} skill yet. Try adding it first!")
+            print(f"{self.name} doesn't have the {skill} skill yet. Try adding it first!")
 
     def add_relationship(self, other: 'Individual', relationship_type: str) -> None:
         self.relationships[other.name] = relationship_type
-        print(f"❤️ {self.name} now has a {relationship_type} relationship with {other.name}")
+        print(f"{self.name} now has a {relationship_type} relationship with {other.name}")
 
     def add_life_event(self, event: str) -> None:
         self.life_events.append(event)
-        print(f"📅 New life event for {self.name}: {event}")
+        print(f"New life event for {self.name}: {event}")
 
     def die(self) -> None:
         self.is_alive = False
-        print(f"☠️ {self.name} has shuffled off this mortal coil. Their story in this universe has ended.")
+        print(f"{self.name} has shuffled off this mortal coil. Their story in this universe has ended.")
 
 class IndividualManager:
     def __init__(self):
@@ -65,9 +65,9 @@ class IndividualManager:
     def remove_individual(self, name: str) -> None:
         if name in self.individuals:
             del self.individuals[name]
-            print(f"🚫 {name} has been removed from the universe. Hope it wasn't anything personal!")
+            print(f"{name} has been removed from the universe. Nothing personal.")
         else:
-            print(f"🤷‍♂️ {name} not found in this universe. Did they escape to a parallel one?")
+            print(f"{name} not found in this universe. They may have left for a parallel one.")
 
 class LifeSimulator:
     @staticmethod

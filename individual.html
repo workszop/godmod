@@ -27,6 +27,7 @@
       <a href="godmod_docs_website.html">Docs</a>
       <a href="godmod_individual_website.html">Life Extension</a>
       <a href="tutorial_uni.html">Tutorial</a>
+      <a href="console.html">Console</a>
       <a href="godmod.html" class="on">Code</a>
     </nav>
     <div class="actions">
@@ -67,7 +68,7 @@ class Individual:
         self.relationships = {}  # Relationships with other individuals
         self.life_events = []  # List of significant life events
         self.is_alive = True
-        print(f"👤 {name}, a {species}, has entered the universe. May their story be interesting!")
+        print(f"{name}, a {species}, has entered the universe. Story begins.")
 
     def age(self) -&gt; int:
         current_date = datetime.now()
@@ -75,34 +76,34 @@ class Individual:
 
     def set_luck(self, value: int) -&gt; None:
         self.luck = max(0, min(100, value))  # Ensure luck stays between 0 and 100
-        print(f"🍀 {self.name}'s luck has been set to {self.luck}. Let's see how it plays out!")
+        print(f"{self.name}'s luck has been set to {self.luck}.")
 
     def add_fate_event(self, event: str, age: int) -&gt; None:
         self.fate[age] = event
-        print(f"🔮 A new fate has been written for {self.name}: At age {age}, {event}")
+        print(f"A new fate has been written for {self.name}: At age {age}, {event}")
 
     def add_skill(self, skill: str, level: int) -&gt; None:
         self.skills[skill] = level
-        print(f"🌟 {self.name} has gained the skill: {skill} at level {level}")
+        print(f"{self.name} has gained the skill: {skill} at level {level}")
 
     def improve_skill(self, skill: str, improvement: int) -&gt; None:
         if skill in self.skills:
             self.skills[skill] += improvement
-            print(f"📈 {self.name}'s {skill} skill has improved by {improvement} to level {self.skills[skill]}")
+            print(f"{self.name}'s {skill} skill has improved by {improvement} to level {self.skills[skill]}")
         else:
-            print(f"❓ {self.name} doesn't have the {skill} skill yet. Try adding it first!")
+            print(f"{self.name} doesn't have the {skill} skill yet. Try adding it first!")
 
     def add_relationship(self, other: 'Individual', relationship_type: str) -&gt; None:
         self.relationships[other.name] = relationship_type
-        print(f"❤️ {self.name} now has a {relationship_type} relationship with {other.name}")
+        print(f"{self.name} now has a {relationship_type} relationship with {other.name}")
 
     def add_life_event(self, event: str) -&gt; None:
         self.life_events.append(event)
-        print(f"📅 New life event for {self.name}: {event}")
+        print(f"New life event for {self.name}: {event}")
 
     def die(self) -&gt; None:
         self.is_alive = False
-        print(f"☠️ {self.name} has shuffled off this mortal coil. Their story in this universe has ended.")
+        print(f"{self.name} has shuffled off this mortal coil. Their story in this universe has ended.")
 
 class IndividualManager:
     def __init__(self):
@@ -119,9 +120,9 @@ class IndividualManager:
     def remove_individual(self, name: str) -&gt; None:
         if name in self.individuals:
             del self.individuals[name]
-            print(f"🚫 {name} has been removed from the universe. Hope it wasn't anything personal!")
+            print(f"{name} has been removed from the universe. Nothing personal.")
         else:
-            print(f"🤷‍♂️ {name} not found in this universe. Did they escape to a parallel one?")
+            print(f"{name} not found in this universe. They may have left for a parallel one.")
 
 class LifeSimulator:
     @staticmethod
@@ -212,7 +213,8 @@ def main():
     print("Remember, with great power comes great responsibility... and endless entertainment!")
 
 if __name__ == "__main__":
-    main()</pre>
+    main()
+</pre>
     </div>
   </div>
 </main>
@@ -229,6 +231,7 @@ if __name__ == "__main__":
       </div>
       <div>
         <h4>Code</h4>
+        <a href="console.html">GodMod Console</a>
         <a href="godmod.html">godmod.py</a>
         <a href="individual.html">Life Extension source</a>
         <a href="https://github.com/workszop/godmod">GitHub repository</a>

@@ -1,0 +1,2553 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GodMod Console – reality control suite</title>
+<meta name="description" content="GodMod Console: a working control program for universes. Real N-body gravity, adjustable physical constants, evolving life, and a terminal that runs the godmod Python API.">
+<link rel="icon" href="favicon.ico">
+<meta name="theme-color" content="#02060d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* ─── Tokens ─── */
+:root{
+  color-scheme:dark;
+  --void:#02060d;
+  --void-2:#050c18;
+  --hull:#081424;
+  --hull-2:#0c1c30;
+  --hull-3:#11253d;
+  --line:#173049;
+  --line-2:#24486b;
+  --glow:#61c0cb;
+  --glow-2:#05769d;
+  --signal:#ecb032;
+  --flare:#f06a2a;
+  --life:#7ee0a1;
+  --exotic:#b48cff;
+  --text:#d9e6f0;
+  --text-hi:#f4f9fd;
+  --text-dim:#93aabd;
+  --text-faint:#5d7790;
+  --on-glow:#021d31;
+  --on-signal:#1c1302;
+
+  /* canvas palette (read by the renderer) */
+  --c-space:#02060d;
+  --c-star:#ffcf7a;
+  --c-star-core:#fff6e3;
+  --c-neutron:#bfefff;
+  --c-disk:#f06a2a;
+  --c-disk-2:#ecb032;
+  --c-planet-1:#61c0cb;
+  --c-planet-2:#ecb032;
+  --c-planet-3:#f06a2a;
+  --c-planet-4:#2b9fb4;
+  --c-planet-5:#d9b98a;
+  --c-planet-6:#9fb7ff;
+  --c-debris:#7f90a6;
+  --c-life:#7ee0a1;
+  --c-worm:#b48cff;
+  --c-grid:#173049;
+  --c-select:#ecb032;
+  --c-label:#93aabd;
+  --c-bgstar:#e6f2ff;
+  --c-nebula-1:#61c0cb;
+  --c-nebula-2:#b48cff;
+  --c-nebula-3:#f06a2a;
+  --c-blast:#fff1c9;
+  --c-beam:#b48cff;
+
+  --glow-a10:color-mix(in srgb,var(--glow) 10%,transparent);
+  --glow-a18:color-mix(in srgb,var(--glow) 18%,transparent);
+  --glow-a35:color-mix(in srgb,var(--glow) 35%,transparent);
+  --signal-a12:color-mix(in srgb,var(--signal) 12%,transparent);
+  --signal-a35:color-mix(in srgb,var(--signal) 35%,transparent);
+  --flare-a18:color-mix(in srgb,var(--flare) 18%,transparent);
+  --void-a85:color-mix(in srgb,var(--void) 85%,transparent);
+
+  --font:"IBM Plex Sans",system-ui,sans-serif;
+  --display:"Chakra Petch","IBM Plex Sans",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --fs:13.5px;
+  --fs-small:12px;
+  --fs-label:10.5px;
+  --track:.16em;
+
+  --bar-h:56px;
+  --left-w:272px;
+  --right-w:300px;
+  --term-h:236px;
+}
+
+/* ─── Base ─── */
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--void);color:var(--text);font-family:var(--font);font-size:var(--fs);line-height:1.5;overflow:hidden;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--glow)}
+:focus-visible{outline:2px solid var(--signal);outline-offset:1px}
+::selection{background:var(--signal);color:var(--on-signal)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.label{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:var(--track);text-transform:uppercase;color:var(--text-faint)}
+
+/* ─── Layout ─── */
+#app{height:100vh;height:100dvh;display:grid;
+  grid-template-rows:var(--bar-h) minmax(0,1fr) var(--term-h);
+  grid-template-columns:var(--left-w) minmax(0,1fr) var(--right-w);
+  grid-template-areas:"bar bar bar" "left view right" "term term log";
+  gap:1px;background:var(--line)}
+.bar{grid-area:bar}
+.left{grid-area:left}
+.viewport{grid-area:view}
+.right{grid-area:right}
+.term{grid-area:term}
+.log{grid-area:log}
+
+/* ─── Top bar ─── */
+.bar{display:flex;align-items:center;gap:16px;padding:0 14px;background:var(--void-2);min-width:0}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text-hi);flex:none}
+.brand img{width:28px;height:28px;border-radius:50%;box-shadow:0 0 0 1px var(--glow-a35),0 0 14px var(--glow-a35)}
+.brand b{font-family:var(--display);font-size:17px;letter-spacing:.1em;text-transform:uppercase}
+.brand small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-faint)}
+.unis{display:flex;gap:4px;min-width:0;overflow-x:auto;scrollbar-width:none}
+.unis button{flex:none;background:none;border:1px solid var(--line-2);padding:5px 10px;font-family:var(--mono);font-size:11.5px;color:var(--text-dim);border-radius:2px}
+.unis button:hover{color:var(--text-hi);border-color:var(--glow-a35)}
+.unis button[aria-current="true"]{color:var(--on-glow);background:var(--glow);border-color:var(--glow)}
+.unis .add{color:var(--glow);border-style:dashed}
+.readouts{display:flex;gap:18px;margin-left:auto;flex:none}
+.ro{display:flex;flex-direction:column;line-height:1.25}
+.ro span{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-faint)}
+.ro b{font-family:var(--mono);font-weight:500;font-size:13px;color:var(--glow);font-variant-numeric:tabular-nums}
+.ro b.warn{color:var(--signal)}
+.ro b.crit{color:var(--flare)}
+.ctl{display:flex;gap:4px;flex:none}
+.btn{background:var(--glow-a10);border:1px solid var(--line-2);color:var(--text-hi);padding:6px 10px;border-radius:2px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.btn:hover{border-color:var(--glow);background:var(--glow-a18)}
+.btn.on{background:var(--glow);color:var(--on-glow);border-color:var(--glow)}
+.btn.warn{border-color:var(--signal-a35);color:var(--signal);background:var(--signal-a12)}
+.btn.warn:hover{border-color:var(--signal)}
+.btn.danger{border-color:var(--flare);color:var(--flare);background:var(--flare-a18)}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* ─── Panels ─── */
+.panel{background:var(--hull);display:flex;flex-direction:column;min-height:0;min-width:0}
+.ph{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);background:var(--void-2);flex:none}
+.ph h2{margin:0;font-family:var(--mono);font-weight:500;font-size:var(--fs-label);letter-spacing:.2em;text-transform:uppercase;color:var(--signal)}
+.ph .sub{font-family:var(--mono);font-size:var(--fs-label);color:var(--text-faint)}
+.ph .acts{margin-left:auto;display:flex;gap:4px}
+.ph svg.glyphs{height:12px;width:auto;color:var(--glow);opacity:.45;margin-left:auto}
+.pb{padding:12px;overflow:auto;min-height:0;scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+.left .pb.laws{flex:1 1 auto}
+.left .pb.tools{flex:none;border-top:1px solid var(--line)}
+svg.glyphs path{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:square}
+svg.glyphs circle{fill:currentColor}
+
+/* physical laws */
+.law{margin-bottom:14px}
+.law .top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.law .name{font-size:12.5px;color:var(--text)}
+.law .val{font-family:var(--mono);font-size:11.5px;color:var(--glow);font-variant-numeric:tabular-nums;white-space:nowrap}
+.law .val.off{color:var(--signal)}
+.law .note{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);margin-top:2px;min-height:15px}
+input[type=range]{width:100%;margin:6px 0 0;accent-color:var(--glow);height:16px}
+.reset-laws{width:100%;margin-top:2px}
+
+/* instruments */
+.tools-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.tool{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px 5px;background:var(--void-2);border:1px solid var(--line);border-radius:2px;color:var(--text-dim)}
+.tool svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.4}
+.tool span{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;line-height:1.2;text-align:center}
+.tool kbd{font-family:var(--mono);font-size:9px;color:var(--text-faint)}
+.tool:hover{color:var(--text-hi);border-color:var(--glow-a35)}
+.tool[aria-pressed="true"]{color:var(--glow);border-color:var(--glow);background:var(--glow-a10)}
+
+/* ─── Viewport ─── */
+.viewport{position:relative;background:var(--c-space);overflow:hidden;min-width:0;min-height:0}
+#view{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.hud{position:absolute;z-index:2;font-family:var(--mono);font-size:11px;color:var(--text-dim);pointer-events:none}
+.hud.tl{top:10px;left:12px;max-width:min(60%,440px)}
+.hud.tl b{color:var(--signal);font-weight:500;letter-spacing:.12em;text-transform:uppercase;font-size:10.5px}
+.hud.bl{bottom:10px;left:12px}
+.hud.br{bottom:10px;right:12px;text-align:right}
+.hud.tr{top:10px;right:10px;pointer-events:auto;display:flex;gap:4px}
+.notice{position:absolute;z-index:3;left:50%;top:14px;transform:translate(-50%,-8px);opacity:0;pointer-events:none;
+  background:var(--void-a85);border:1px solid var(--signal-a35);color:var(--text-hi);font-family:var(--mono);font-size:12px;
+  padding:7px 12px;transition:opacity .25s ease,transform .25s ease;max-width:80%;text-align:center}
+.notice.on{opacity:1;transform:translate(-50%,0)}
+.paused-tag{position:absolute;z-index:2;left:50%;bottom:14px;transform:translateX(-50%);font-family:var(--mono);font-size:11px;letter-spacing:.3em;
+  color:var(--signal);border:1px solid var(--signal-a35);padding:4px 12px;background:var(--void-a85);display:none}
+#app[data-paused="true"] .paused-tag{display:block}
+
+/* ─── Inspector ─── */
+.insp h3{margin:0 0 2px;font-family:var(--display);font-weight:600;font-size:20px;color:var(--text-hi)}
+.insp .kind{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:var(--track);text-transform:uppercase;color:var(--text-faint);margin-bottom:12px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0 0 14px;font-size:12.5px}
+.kv dt{color:var(--text-faint);font-family:var(--mono);font-size:11px}
+.kv dd{margin:0;text-align:right;font-family:var(--mono);font-size:11.5px;color:var(--text-hi);font-variant-numeric:tabular-nums}
+.kv dd.good{color:var(--life)}
+.kv dd.warn{color:var(--signal)}
+.kv dd.crit{color:var(--flare)}
+.sect{margin:16px 0 8px;padding-top:10px;border-top:1px solid var(--line)}
+.sect .label{color:var(--signal);display:block;margin-bottom:8px}
+.acts-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.meter{height:6px;background:var(--void-2);border:1px solid var(--line);margin:4px 0 10px;position:relative}
+.meter i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--glow-2),var(--life))}
+.seed{display:flex;gap:4px}
+.seed input{flex:1;min-width:0;background:var(--void-2);border:1px solid var(--line-2);padding:5px 8px;font-family:var(--mono);font-size:12px;border-radius:2px}
+.blist{list-style:none;margin:0;padding:0}
+.blist li button{display:flex;width:100%;gap:8px;align-items:center;background:none;border:0;border-left:1px solid var(--line);padding:4px 8px;text-align:left;color:var(--text-dim);font-size:12.5px}
+.blist li button:hover{background:var(--glow-a10);color:var(--text-hi);border-left-color:var(--glow)}
+.blist .dot{width:8px;height:8px;border-radius:50%;flex:none}
+.blist .t{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.1em}
+.blist .lf{color:var(--life);font-family:var(--mono);font-size:10px}
+.hint{font-size:12px;color:var(--text-faint);margin:10px 0 0}
+
+/* ─── Terminal ─── */
+.term .out{flex:1 1 auto;overflow:auto;padding:10px 14px;font-family:var(--mono);font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;
+  scrollbar-width:thin;scrollbar-color:var(--line-2) transparent;background:var(--void-2)}
+.out .in{color:var(--text-dim)}
+.out .in::before{content:">>> ";color:var(--glow)}
+.out .ok{color:var(--text-hi)}
+.out .val{color:var(--glow)}
+.out .err{color:var(--flare)}
+.out .sys{color:var(--text-faint)}
+.term form{display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--line);background:var(--void)}
+.term form label{font-family:var(--mono);color:var(--glow);font-size:13px}
+.term form input{flex:1;background:none;border:0;outline:none;font-family:var(--mono);font-size:13px;color:var(--text-hi);caret-color:var(--signal)}
+
+/* ─── Log ─── */
+.log ol{list-style:none;margin:0;padding:8px 12px;font-size:12px}
+.log li{padding:4px 0 4px 10px;border-left:2px solid var(--line-2);margin-bottom:4px;animation:fade .4s ease}
+.log li time{display:block;font-family:var(--mono);font-size:10px;color:var(--text-faint)}
+.log li[data-kind="life"]{border-left-color:var(--life)}
+.log li[data-kind="warn"]{border-left-color:var(--signal)}
+.log li[data-kind="crit"]{border-left-color:var(--flare)}
+.log li[data-kind="exotic"]{border-left-color:var(--exotic)}
+@keyframes fade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+/* ─── Boot and help overlays ─── */
+.boot{position:fixed;inset:0;z-index:20;background:var(--void);display:flex;align-items:center;justify-content:center;padding:24px;transition:opacity .5s ease}
+.boot.done{opacity:0;pointer-events:none}
+.boot .box{width:min(560px,100%);font-family:var(--mono);font-size:12.5px;color:var(--text-dim)}
+.boot h1{font-family:var(--display);font-size:clamp(28px,5vw,44px);color:var(--text-hi);letter-spacing:.08em;margin:0 0 4px;text-transform:uppercase}
+.boot .glyph-line{color:var(--glow);opacity:.6;margin:0 0 20px}
+.boot .glyph-line svg{height:16px;width:auto}
+.boot ul{list-style:none;padding:0;margin:0 0 18px;min-height:150px}
+.boot li{animation:fade .3s ease}
+.boot li b{color:var(--life);font-weight:500}
+.boot .bar-track{height:3px;background:var(--line);position:relative}
+.boot .bar-track i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,var(--glow-2),var(--glow),var(--signal));box-shadow:0 0 12px var(--glow)}
+.boot .skip{margin-top:12px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint)}
+
+.help{position:fixed;inset:0;z-index:15;background:var(--void-a85);display:flex;align-items:center;justify-content:center;padding:20px}
+.help[hidden]{display:none}
+.help .box{width:min(860px,100%);max-height:100%;overflow:auto;background:var(--hull);border:1px solid var(--line-2);padding:22px 24px;box-shadow:0 0 60px var(--glow-a18)}
+.help h2{font-family:var(--display);color:var(--text-hi);margin:0 0 4px;font-size:22px}
+.help h3{font-family:var(--mono);font-weight:500;font-size:var(--fs-label);letter-spacing:.2em;text-transform:uppercase;color:var(--signal);margin:18px 0 8px}
+.help .cols{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px}
+.help .k{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;border-bottom:1px solid var(--line);padding:3px 0}
+.help kbd{font-family:var(--mono);font-size:11px;color:var(--glow);border:1px solid var(--line-2);padding:0 5px;border-radius:2px}
+.help pre{font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--text);white-space:pre-wrap;margin:0}
+.help pre b{color:var(--glow);font-weight:500}
+.help .close{float:right}
+
+/* ─── Responsive ─── */
+@media (max-width:1180px){
+  :root{--left-w:236px;--right-w:260px}
+  .readouts .ro.opt{display:none}
+}
+@media (max-width:768px){
+  body{overflow:auto}
+  #app{height:auto;display:flex;flex-direction:column}
+  .bar{flex-wrap:wrap;padding:8px 12px;gap:8px}
+  .readouts{margin-left:0;width:100%;justify-content:space-between;gap:8px;order:3}
+  .ctl{order:2;margin-left:auto}
+  .ctl .btn{padding:6px 8px}
+  .brand small{display:none}
+  .unis{order:4;width:100%}
+  .bar{order:0}
+  .viewport{order:1;height:62vh;min-height:360px}
+  .term{order:2}
+  .right{order:3}
+  .left{order:4}
+  .log{order:5}
+  .term{height:340px}
+  .log{max-height:260px}
+  .help .cols{grid-template-columns:1fr}
+  .ph{flex-wrap:wrap}
+  .ph .acts{margin-left:0;width:100%}
+  .ph .acts .btn{flex:1}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div id="app" data-state="booting">
+
+  <header class="bar">
+    <a class="brand" href="index.html" title="Back to the archive">
+      <img src="favicon.ico" alt="">
+      <span><b>GodMod</b><small>Reality control suite 2.0</small></span>
+    </a>
+    <nav class="unis" id="unis" aria-label="Multiverse"></nav>
+    <div class="readouts" aria-label="Universe readouts">
+      <div class="ro"><span>Cosmic time</span><b id="roTime">–</b></div>
+      <div class="ro"><span>Rate</span><b id="roRate">–</b></div>
+      <div class="ro opt"><span>Bodies</span><b id="roBodies">–</b></div>
+      <div class="ro opt"><span>Biospheres</span><b id="roLife">–</b></div>
+      <div class="ro"><span>Stability</span><b id="roStab">–</b></div>
+    </div>
+    <div class="ctl">
+      <button class="btn" id="btnRewind" title="Rewind 5 Myr (R)">⟲ 5 Myr</button>
+      <button class="btn" id="btnSlower" title="Slower ([)" aria-label="Slower">−</button>
+      <button class="btn" id="btnPause" title="Pause or resume (Space)">Pause</button>
+      <button class="btn" id="btnFaster" title="Faster (])" aria-label="Faster">+</button>
+      <button class="btn warn" id="btnBang" title="Big Bang: replace this universe (Shift+B)">Big Bang</button>
+      <button class="btn" id="btnHelp" title="Help (?)" aria-label="Help">?</button>
+    </div>
+  </header>
+
+  <aside class="panel left" aria-label="Physical laws and instruments">
+    <div class="ph"><h2>Physical laws</h2><span data-glyphs="4" data-seed="laws"></span></div>
+    <div class="pb laws" id="laws"></div>
+    <div class="ph"><h2>Instruments</h2><span data-glyphs="3" data-seed="tools"></span></div>
+    <div class="pb tools"><div class="tools-grid" id="tools" role="toolbar" aria-label="Instruments"></div></div>
+  </aside>
+
+  <main class="viewport" id="viewport" aria-label="Universe viewport">
+    <canvas id="view" aria-label="Simulation of the active universe" role="img"></canvas>
+    <div class="hud tl" id="hudTool"></div>
+    <div class="hud tr">
+      <button class="btn" id="zoomIn" title="Zoom in (+)" aria-label="Zoom in">+</button>
+      <button class="btn" id="zoomOut" title="Zoom out (-)" aria-label="Zoom out">−</button>
+      <button class="btn" id="zoomFit" title="Fit view (0)">Fit</button>
+    </div>
+    <div class="hud bl" id="hudCursor"></div>
+    <div class="hud br" id="hudScale"></div>
+    <div class="notice" id="notice" role="status" aria-live="polite"></div>
+    <div class="paused-tag">Time paused</div>
+  </main>
+
+  <aside class="panel right" aria-label="Inspector">
+    <div class="ph"><h2 id="inspTitle">Universe</h2><span data-glyphs="3" data-seed="inspector"></span></div>
+    <div class="pb insp" id="inspector"></div>
+  </aside>
+
+  <section class="panel term" aria-label="Terminal">
+    <div class="ph">
+      <h2>Terminal</h2><span class="sub">python 3 · import godmod as gm</span>
+      <div class="acts">
+        <button class="btn warn" id="btnStory" title="Type the nine lines from The God Machine">Run the story transcript</button>
+        <button class="btn" id="btnClear">Clear</button>
+      </div>
+    </div>
+    <div class="out" id="termOut" data-last="none"></div>
+    <form id="termForm" autocomplete="off">
+      <label for="termIn">&gt;&gt;&gt;</label>
+      <input id="termIn" spellcheck="false" autocapitalize="off" placeholder="help()  ·  Tab completes  ·  ↑ history">
+    </form>
+  </section>
+
+  <section class="panel log" aria-label="Cosmic log">
+    <div class="ph"><h2>Cosmic log</h2><span class="sub" id="logCount"></span></div>
+    <ol class="pb" id="log" role="log" aria-live="polite"></ol>
+  </section>
+
+  <div class="boot" id="boot" aria-live="polite">
+    <div class="box">
+      <h1>GodMod</h1>
+      <div class="glyph-line" data-glyphs="18" data-seed="boot"></div>
+      <ul id="bootLines"></ul>
+      <div class="bar-track" role="progressbar" aria-label="Console start-up" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bootBar"><i></i></div>
+      <div class="skip">Press any key to skip</div>
+    </div>
+  </div>
+
+  <div class="help" id="help" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="box">
+      <button class="btn close" id="helpClose">Close · Esc</button>
+      <h2 id="helpTitle">Operator manual</h2>
+      <p class="label">GodMod 2.0 · abridged for new operators</p>
+      <h3>Controls</h3>
+      <div class="cols" id="helpKeys"></div>
+      <h3>Terminal API</h3>
+      <pre id="helpApi"></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ─── Constants ───
+const G0 = 1000;                 // simulation G at ×1
+const C0 = 600;                  // simulation c at ×1 (units/s)
+const L0 = 150;                  // 1 AU in simulation units
+const MSUN = 1000;
+const EPS = 0.6;                 // gravitational softening
+const ORBIT_SEC = 2 * Math.PI * Math.sqrt(L0 ** 3 / (G0 * MSUN)); // one orbit at 1 AU
+const MYR_PER_SEC = 1 / ORBIT_SEC;                                 // 1 orbit at 1 AU = 1 Myr
+const START_GYR = 13.787;
+const SUBSTEP = 1 / 240;
+const MAX_SUBSTEPS = 640;
+const SNAP_EVERY = 0.5;          // Myr between time-travel snapshots
+const SNAP_MAX = 240;
+const MAX_BODIES = 160;
+const TRAIL_LEN = 110;
+const ESCAPE_DIST = 4200;
+const FIT_RADIUS = 600;
+const RATES = [0, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64];
+const REAL = { G: 6.674e-11, c: 299792458, h: 6.62607015e-34 };
+const DM_V2 = 40 * 40;           // flat halo: adds DM·DM_V2 to v² at every radius
+const DE_H2 = 0.01;              // Λ-like push, grows with distance; orbits beyond r ≈ (GM/4·DE·H2)^⅓ go unstable
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const LAWS = [
+  { key: 'G', name: 'Gravitational constant', min: 0.05, max: 20, log: true, def: 1, real: REAL.G, unit: 'm³ kg⁻¹ s⁻²' },
+  { key: 'c', name: 'Speed of light', min: 0.05, max: 10, log: true, def: 1, real: REAL.c, unit: 'm/s' },
+  { key: 'h', name: 'Planck constant', min: 0.01, max: 2000, log: true, def: 1, real: REAL.h, unit: 'J s' },
+  { key: 'dm', name: 'Dark matter density', min: 0, max: 1, step: 0.01, def: 0.27, pct: true },
+  { key: 'de', name: 'Dark energy intensity', min: 0, max: 1, step: 0.01, def: 0.07, pct: true },
+  { key: 'dims', name: 'Spatial dimensions', min: 2, max: 11, step: 1, def: 3, int: true },
+];
+
+const ICON = {
+  select: '<path d="M6 3l12 8-5 1.5 3 6-2.5 1.2-3-6L6 17z"/>',
+  planet: '<circle cx="12" cy="12" r="5"/><ellipse cx="12" cy="12" rx="10" ry="3.2" transform="rotate(-20 12 12)"/>',
+  star: '<circle cx="12" cy="12" r="3.5"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.8 2.8M16.2 16.2L19 19M5 19l2.8-2.8M16.2 7.8L19 5"/>',
+  blackhole: '<circle cx="12" cy="12" r="3.5" fill="currentColor"/><ellipse cx="12" cy="12" rx="10" ry="4"/>',
+  wormhole: '<circle cx="6" cy="12" r="4"/><circle cx="18" cy="12" r="4"/><path d="M10 12h4" stroke-dasharray="1.5 1.5"/>',
+  supernova: '<circle cx="12" cy="12" r="2.5"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5M4 4l4 4M16 16l4 4M4 20l4-4M16 8l4-4"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 2"/>',
+  grb: '<circle cx="5" cy="19" r="2.5"/><path d="M7 17L21 3M9 18l12-11M6 15L17 3"/>',
+  life: '<path d="M12 21c0-7 0-10 6-15-1 6-3 9-6 10M12 21c0-5-1-8-6-11 0 4 2 7 6 8"/>',
+};
+
+const TOOLS = [
+  { id: 'select', key: '1', name: 'Select', hint: 'Click a body to inspect it. Drag a body to fling it. Drag empty space to pan. Double-click to follow.' },
+  { id: 'planet', key: '2', name: 'Planet', hint: 'Click for a circular orbit around the strongest attractor, or drag to launch with a velocity.' },
+  { id: 'star', key: '3', name: 'Star', hint: 'Click to ignite a star in orbit, or drag to launch one. Two suns are a design choice.' },
+  { id: 'blackhole', key: '4', name: 'Black hole', hint: 'Click or drag to place a black hole. It will not give anything back.' },
+  { id: 'wormhole', key: '5', name: 'Wormhole', hint: 'Click the entrance, then the exit. Click on a body to anchor a mouth to it.' },
+  { id: 'supernova', key: '6', name: 'Supernova', hint: 'Click a star to end it. Nearby biospheres are sterilised.' },
+  { id: 'grb', key: '7', name: 'Gamma burst', hint: 'Click to fire a gamma-ray burst from that point. The beam direction is not negotiable.' },
+  { id: 'life', key: '8', name: 'Seed life', hint: 'Click a planet to seed microbial life. Whether it survives depends on the planet.' },
+];
+
+const STAGES = [
+  [0, 'Microbial life'], [2, 'Multicellular life'], [4, 'Complex animals'], [6, 'Tool users'],
+  [7.5, 'Industrial civilisation'], [9, 'Spacefaring civilisation'], [10, 'Operates its own GodMod console'],
+];
+const SPECIES_A = ['Zeph', 'Quor', 'Ael', 'Vash', 'Tril', 'Oon', 'Kry', 'Mael', 'Ixo', 'Thal', 'Ner', 'Usk'];
+const SPECIES_B = ['yrians', 'ites', 'ari', 'oids', 'ae', 'uun', 'enti', 'ox'];
+const STAR_NAMES = ['Vael', 'Orrun', 'Thessa', 'Ixion', 'Maru', 'Celen', 'Odra', 'Kesh', 'Halcyon', 'Tyr', 'Amaru', 'Seren'];
+const GLYPH_X = [2, 8, 14];
+const GLYPH_Y = [3, 9, 15, 21];
+
+const BOOT_LINES = [
+  'Waking console from dormancy',
+  'Operator detected: <b>Homo sapiens</b>, unregistered. Granting access anyway',
+  'Loading 27 modules',
+  'Mounting multiverse: 1 universe',
+  'Calibrating G, c, h against local reality',
+  'Indexing 9 bodies, 1 biosphere',
+  'Reality stable',
+];
+
+const STORY = [
+  "import godmod as gm",
+  "universe = gm.Universe(name='MilkyWay')",
+  "earth = gm.CelestialBody(name='Earth', type='planet')",
+  "universe.add_body(earth)",
+  "humans = gm.LifeForm(name='Humans', planet=earth)",
+  "humans.evolve(intelligence_level=10)",
+  "message = gm.CosmicEvent()",
+  "message.create_nebula(location='AlphaCentauri')",
+  "message.shape_nebula(shape='Welcome, Inheritors')",
+];
+
+// ─── State ───
+const App = {
+  state: 'booting',              // booting | running
+  paused: false,
+  rateIdx: 3,
+  multiverse: [],
+  active: 0,
+  tool: 'select',
+  selectedId: null,
+  followId: null,
+  cam: { x: 0, y: 0, zoom: 1, target: null },
+  vars: new Map(),
+  history: [],
+  histIdx: 0,
+  nextId: 1,
+  nextUid: 1,
+  pointer: null,
+  hoverId: null,
+  mouse: { sx: 0, sy: 0, wx: 0, wy: 0, inside: false },
+  pendingMouth: null,
+  flashes: [],
+  quantum: new Map(),
+  logCount: 0,
+  uiAt: 0,
+  inspSig: '',
+  unisSig: '',
+  bgStars: [],
+  colors: {},
+  storyRunning: false,
+  noticeTimer: null,
+  W: 0, H: 0, dpr: 1,
+};
+
+// ─── DOM refs ───
+const $ = (s) => document.querySelector(s);
+const appEl = $('#app');
+const canvas = $('#view');
+const ctx = canvas.getContext('2d');
+const viewportEl = $('#viewport');
+const lawsEl = $('#laws');
+const toolsEl = $('#tools');
+const unisEl = $('#unis');
+const inspEl = $('#inspector');
+const inspTitle = $('#inspTitle');
+const termOut = $('#termOut');
+const termForm = $('#termForm');
+const termIn = $('#termIn');
+const logEl = $('#log');
+const logCount = $('#logCount');
+const hudTool = $('#hudTool');
+const hudCursor = $('#hudCursor');
+const hudScale = $('#hudScale');
+const noticeEl = $('#notice');
+const bootEl = $('#boot');
+const bootLines = $('#bootLines');
+const bootBar = $('#bootBar');
+const helpEl = $('#help');
+const ro = { time: $('#roTime'), rate: $('#roRate'), bodies: $('#roBodies'), life: $('#roLife'), stab: $('#roStab') };
+const btn = { pause: $('#btnPause'), rewind: $('#btnRewind'), slower: $('#btnSlower'), faster: $('#btnFaster'), bang: $('#btnBang'), help: $('#btnHelp'), story: $('#btnStory'), clear: $('#btnClear') };
+
+// ─── Helpers ───
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const rand = (a, b) => a + Math.random() * (b - a);
+const pickR = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+
+function sci(v, digits = 3) {
+  if (v === 0) return '0';
+  const e = Math.floor(Math.log10(Math.abs(v)));
+  if (e >= -2 && e < 6) return (+v.toPrecision(digits + 1)).toLocaleString('en-US');
+  const m = v / 10 ** e;
+  return m.toFixed(digits) + '×10' + String(e).split('').map((c) => SUP[c]).join('');
+}
+function big(n) {
+  if (n >= 1e12) return sci(n, 2);
+  return Math.round(n).toLocaleString('en-US');
+}
+function mult(v) { return '×' + (v >= 10 ? v.toFixed(0) : v >= 1 ? v.toFixed(2) : v.toPrecision(2)); }
+function au(d) { return (d / L0).toFixed(2) + ' AU'; }
+function speciesName() { return pickR(SPECIES_A) + pickR(SPECIES_B); }
+function stageOf(iq) { let s = STAGES[0][1]; for (const [t, n] of STAGES) if (iq >= t) s = n; return s; }
+function lc(s) { return s[0].toLowerCase() + s.slice(1); }
+function stageIndex(iq) { let i = 0; STAGES.forEach(([t], k) => { if (iq >= t) i = k; }); return i; }
+
+function readColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const get = (n) => cs.getPropertyValue(n).trim();
+  App.colors = {
+    space: get('--c-space'), star: get('--c-star'), starCore: get('--c-star-core'), neutron: get('--c-neutron'),
+    disk: get('--c-disk'), disk2: get('--c-disk-2'), debris: get('--c-debris'), life: get('--c-life'), worm: get('--c-worm'),
+    grid: get('--c-grid'), select: get('--c-select'), label: get('--c-label'), bgStar: get('--c-bgstar'),
+    nebula: [get('--c-nebula-1'), get('--c-nebula-2'), get('--c-nebula-3')], blast: get('--c-blast'), beam: get('--c-beam'),
+    planets: [1, 2, 3, 4, 5, 6].map((i) => get('--c-planet-' + i)),
+  };
+}
+
+/* the artefact's script: same generator as the archive site */
+function prng(seed) {
+  return function () {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashSeed(str) { let h = 2166136261; for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 16777619); return h >>> 0; }
+function glyphMarkup(r) {
+  const pk = (a) => a[Math.floor(r() * a.length)];
+  let d = 'M0 3H16';
+  const strokes = 2 + Math.floor(r() * 2);
+  for (let s = 0; s < strokes; s++) {
+    let xi = Math.floor(r() * 3), yi = s === 0 ? 0 : Math.floor(r() * 4);
+    d += 'M' + GLYPH_X[xi] + ' ' + GLYPH_Y[yi];
+    const segs = 1 + Math.floor(r() * 2);
+    for (let k = 0; k < segs; k++) {
+      let nx = clamp(xi + pk([-1, 0, 1]), 0, 2), ny = clamp(yi + pk([1, 1, 2, -1]), 0, 3);
+      if (nx === xi && ny === yi) ny = clamp(yi + 1, 0, 3);
+      xi = nx; yi = ny;
+      d += 'L' + GLYPH_X[xi] + ' ' + GLYPH_Y[yi];
+    }
+  }
+  const dot = r() < 0.4 ? '<circle cx="' + pk(GLYPH_X) + '" cy="24" r="1.4"/>' : '';
+  return '<path d="' + d + '"/>' + dot;
+}
+function glyphStrip(seed, n) {
+  const r = prng(seed);
+  let x = 0, body = '';
+  for (let i = 0; i < n; i++) { body += '<g transform="translate(' + x + ' 0)">' + glyphMarkup(r) + '</g>'; x += 20 + (i % 4 === 3 ? 8 : 0); }
+  return '<svg class="glyphs" viewBox="-1 0 ' + (x + 2) + ' 26" aria-hidden="true" focusable="false">' + body + '</svg>';
+}
+
+function notice(msg) {
+  noticeEl.textContent = msg;
+  noticeEl.classList.add('on');
+  clearTimeout(App.noticeTimer);
+  App.noticeTimer = setTimeout(() => noticeEl.classList.remove('on'), 2600);
+}
+
+function isTyping(t) { return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable); }
+
+// ─── Model: universes and bodies ───
+function U() { return App.multiverse[App.active]; }
+function uByUid(uid) { return App.multiverse.find((u) => u.uid === uid); }
+function uByName(name) { return App.multiverse.find((u) => u.name.toLowerCase() === String(name).toLowerCase()); }
+
+function makeUniverse(name) {
+  return {
+    uid: App.nextUid++, name, bodies: [], t: 0, lastSnap: -1, snaps: [],
+    laws: Object.fromEntries(LAWS.map((l) => [l.key, l.def])),
+    nebulae: [], wormholes: [], heat: 1, dying: false, dead: false, escaped: 0,
+  };
+}
+function myr(u) { return u.t * MYR_PER_SEC; }
+function gs(u) { return G0 * u.laws.G; }
+
+function radiusFor(type, m) {
+  if (type === 'star') return 10 + 6 * Math.cbrt(m / MSUN);
+  if (type === 'blackhole') return 5 + 2.2 * Math.cbrt(m / MSUN);
+  if (type === 'neutron') return 3;
+  if (type === 'debris') return 0.9 + Math.cbrt(m) * 1.4;
+  if (type === 'moon') return 1.3 + Math.cbrt(m) * 4;
+  return 2.2 + Math.cbrt(m) * 2.6;
+}
+
+function makeBody(o) {
+  const type = o.type || 'planet';
+  const m = o.m ?? (type === 'star' ? rand(600, 1400) : type === 'blackhole' ? 4000 : type === 'moon' ? rand(0.002, 0.03) : rand(0.02, 2.5));
+  return {
+    id: App.nextId++, name: o.name || autoName(type), type, m,
+    r: o.r ?? radiusFor(type, m), x: o.x || 0, y: o.y || 0, vx: o.vx || 0, vy: o.vy || 0, ax: 0, ay: 0,
+    color: o.color || (type === 'debris' ? App.colors.debris : pickR(App.colors.planets)),
+    life: o.life || null, weather: null, trail: [], pinned: false, held: false,
+    temp: 0, noHit: 0, whCool: 0, born: 0,
+  };
+}
+
+let nameSeq = 1;
+function autoName(type) {
+  if (type === 'star') return pickR(STAR_NAMES) + (nameSeq++ > STAR_NAMES.length ? '-' + nameSeq : '');
+  if (type === 'blackhole') return 'BH-' + (100 + nameSeq++);
+  if (type === 'debris') return 'Fragment ' + nameSeq++;
+  return 'GM-' + (nameSeq++) + pickR(['b', 'c', 'd', 'e', 'f']);
+}
+
+function findBody(u, name) {
+  const n = String(name).toLowerCase().replace(/\s+/g, '');
+  return u.bodies.find((b) => b.name.toLowerCase().replace(/\s+/g, '') === n);
+}
+function bodyById(u, id) { return u.bodies.find((b) => b.id === id); }
+function stars(u) { return u.bodies.filter((b) => b.type === 'star'); }
+function massive(u) { return u.bodies.filter((b) => b.type === 'star' || b.type === 'blackhole' || b.type === 'neutron'); }
+function dominant(u) { let best = null; for (const b of massive(u)) if (!best || b.m > best.m) best = b; return best; }
+
+function circularV(u, M, r, halo) {
+  const d = u.laws.dims;
+  let v2 = gs(u) * M * Math.pow(L0 / r, d - 1) / (L0 * L0) * r;
+  if (halo) v2 += u.laws.dm * DM_V2 - u.laws.de * DE_H2 * r * r;
+  return Math.sqrt(Math.max(0, v2));
+}
+/* strongest attractor at a point, for "click to orbit" */
+function attractorAt(u, x, y, skip) {
+  let best = null, bestA = 0;
+  for (const b of u.bodies) {
+    if (b === skip || b.type === 'debris') continue;
+    const r = Math.hypot(b.x - x, b.y - y) + 1;
+    const a = b.m / (r * r);
+    if (a > bestA) { bestA = a; best = b; }
+  }
+  return best;
+}
+function setOrbit(u, b, host, dist, angle) {
+  const a = angle ?? Math.random() * Math.PI * 2;
+  b.x = host.x + Math.cos(a) * dist;
+  b.y = host.y + Math.sin(a) * dist;
+  const halo = host.type === 'star' || host.type === 'blackhole' || host.type === 'neutron';
+  const v = circularV(u, host.m + b.m, dist, halo);
+  b.vx = host.vx + Math.sin(a) * v;
+  b.vy = host.vy - Math.cos(a) * v;
+  b.trail = [];
+}
+function freeOrbit(u, host) {
+  let maxR = 40;
+  for (const b of u.bodies) if (b !== host && b.type !== 'debris') maxR = Math.max(maxR, Math.hypot(b.x - host.x, b.y - host.y));
+  return maxR + 55;
+}
+
+function addBody(u, b) {
+  if (u.bodies.length >= MAX_BODIES) { notice('Body limit reached (' + MAX_BODIES + '). Remove something first.'); return null; }
+  b.born = u.t;
+  u.bodies.push(b);
+  return b;
+}
+
+function seedLife(b, species, pop, iq) {
+  b.life = { species, pop, iq, eco: [species], genes: { heat_tolerance: 0, fertility: 1, intelligence: 1 }, warned: false, stage: stageIndex(iq) };
+}
+
+function defaultUniverse() {
+  const u = makeUniverse('MilkyWay');
+  const sol = addBody(u, makeBody({ name: 'Sol', type: 'star', m: MSUN }));
+  const plan = [
+    // name, distance, mass (Sol = 1000), visual radius, colour
+    ['Mercury', 58, 0.02, 2.4, 4], ['Venus', 100, 0.25, 3.8, 1], ['Earth', 150, 3, 4.2, 0], ['Mars', 232, 0.04, 3, 2],
+    ['Jupiter', 380, 2, 7.5, 4], ['Saturn', 560, 0.8, 6.4, 1],
+  ];
+  plan.forEach(([name, d, m, r, ci], i) => {
+    const b = addBody(u, makeBody({ name, type: 'planet', m, r, color: App.colors.planets[ci] }));
+    setOrbit(u, b, sol, d, i * 1.7 + 0.4);
+  });
+  const earth = findBody(u, 'Earth');
+  const moon = addBody(u, makeBody({ name: 'Moon', type: 'moon', m: 0.01, r: 1.6, color: App.colors.debris }));
+  setOrbit(u, moon, earth, 6.5, 1);
+  seedLife(earth, 'Humans', 8.1e9, 8.2);
+  earth.life.eco.push('Cats', 'Tardigrades', 'Oak trees');
+  return u;
+}
+
+function bigBang(u, quiet) {
+  u.bodies = []; u.nebulae = []; u.wormholes = []; u.snaps = []; u.lastSnap = -1;
+  u.heat = 1; u.dying = false; u.dead = false; u.t = 0; u.escaped = 0;
+  const host = addBody(u, makeBody({ type: 'star', m: rand(750, 1350), x: 0, y: 0 }));
+  const n = 3 + Math.floor(Math.random() * 5);
+  let d = rand(55, 80);
+  for (let i = 0; i < n; i++) {
+    const p = addBody(u, makeBody({ type: 'planet' }));
+    setOrbit(u, p, host, d);
+    const hill = d * Math.cbrt(p.m / (3 * host.m));
+    if (0.42 * hill > p.r + 3 && Math.random() < 0.6) {
+      const moon = addBody(u, makeBody({ type: 'moon', color: App.colors.debris }));
+      setOrbit(u, moon, p, 0.42 * hill);
+    }
+    d *= rand(1.4, 1.65);
+  }
+  if (Math.random() < 0.3) {
+    const s2 = addBody(u, makeBody({ type: 'star', m: rand(300, 600) }));
+    setOrbit(u, s2, host, d + 140);
+  }
+  App.flashes.push({ x: 0, y: 0, t0: performance.now(), dur: 1400, kind: 'bang', r: 700 });
+  if (!quiet) log('Big Bang in ' + u.name + ': ' + stars(u).length + ' star(s), ' + u.bodies.filter((b) => b.type === 'planet').length + ' planets.', 'exotic');
+  if (u === U()) { App.selectedId = null; App.followId = null; fitView(); }
+  return u;
+}
+
+// ─── Physics ───
+function stepPhysics(u, dt) {
+  const B = u.bodies, n = B.length;
+  if (!n) return;
+  const L = u.laws, G = gs(u), d = L.dims, pw = d - 1, c = C0 * L.c, three = d === 3;
+  let cx = 0, cy = 0, cm = 0;
+  for (const b of B) if (b.type === 'star' || b.type === 'blackhole' || b.type === 'neutron') { cx += b.x * b.m; cy += b.y * b.m; cm += b.m; }
+  if (cm) { cx /= cm; cy /= cm; }
+  for (const b of B) { b.ax = 0; b.ay = 0; }
+  for (let i = 0; i < n; i++) {
+    const a = B[i];
+    for (let j = i + 1; j < n; j++) {
+      const b = B[j];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const r2 = dx * dx + dy * dy + EPS * EPS, r = Math.sqrt(r2);
+      const f = three ? G / (r2 * r) : G * Math.pow(L0 / r, pw) / (L0 * L0 * r);
+      a.ax += f * b.m * dx; a.ay += f * b.m * dy;
+      b.ax -= f * a.m * dx; b.ay -= f * a.m * dy;
+    }
+  }
+  for (const b of B) {
+    if (b.pinned || b.held) continue;
+    const ex = b.x - cx, ey = b.y - cy, rc = Math.hypot(ex, ey) + 1;
+    if (L.dm > 0 && rc > 12) { const a = L.dm * DM_V2 / rc; b.ax -= a * ex / rc; b.ay -= a * ey / rc; }
+    if (L.de > 0) { b.ax += L.de * DE_H2 * ex; b.ay += L.de * DE_H2 * ey; }
+    b.vx += b.ax * dt; b.vy += b.ay * dt;
+    const v = Math.hypot(b.vx, b.vy), vmax = 0.98 * c;
+    if (v > vmax) { b.vx *= vmax / v; b.vy *= vmax / v; }
+    b.x += b.vx * dt; b.y += b.vy * dt;
+  }
+  collisions(u);
+  wormholeTransit(u);
+}
+
+function collisions(u) {
+  const B = u.bodies;
+  for (let i = 0; i < B.length; i++) {
+    const a = B[i];
+    if (a.dead) continue;
+    for (let j = i + 1; j < B.length; j++) {
+      const b = B[j];
+      if (b.dead) continue;
+      if ((a.noHit > u.t || b.noHit > u.t) && (a.type === 'debris' || b.type === 'debris')) continue;
+      const dx = b.x - a.x, dy = b.y - a.y, rr = (a.r + b.r) * 0.8;
+      if (dx * dx + dy * dy < rr * rr) collide(u, a, b);
+    }
+  }
+  if (B.some((b) => b.dead)) u.bodies = B.filter((b) => !b.dead);
+}
+
+const rocky = (b) => b.type === 'planet' || b.type === 'moon';
+
+function collide(u, a, b) {
+  let eater = a.m >= b.m ? a : b, food = eater === a ? b : a;
+  if (food.type === 'blackhole' && eater.type !== 'blackhole') { const t = eater; eater = food; food = t; }
+  const rel = Math.hypot(a.vx - b.vx, a.vy - b.vy);
+  if (rocky(a) && rocky(b) && rel > 35 && food.m > 0.01 && u.bodies.length < MAX_BODIES - 8) { shatter(u, eater, food, rel); return; }
+  merge(u, eater, food);
+  if (eater.type === 'blackhole') {
+    if (food.type !== 'debris') log(eater.name + ' consumed ' + food.name + '.', food.life ? 'crit' : 'warn');
+  } else if (food.type !== 'debris') {
+    log(eater.name + ' absorbed ' + food.name + '.', food.life ? 'crit' : 'warn');
+  }
+  if (food.life && food.type !== 'debris') log(food.life.species + ': extinct (their planet was absorbed).', 'crit');
+  if (eater.life && food.m > eater.m * 0.08 && food.type !== 'debris') {
+    eater.life.pop *= 0.04;
+    log('Impact on ' + eater.name + ': ' + eater.life.species + ' reduced to ' + big(eater.life.pop) + '.', 'crit');
+  }
+}
+
+function merge(u, eater, food) {
+  const m = eater.m + food.m;
+  eater.vx = (eater.vx * eater.m + food.vx * food.m) / m;
+  eater.vy = (eater.vy * eater.m + food.vy * food.m) / m;
+  if (eater.type !== 'blackhole' && eater.type !== 'star') {
+    eater.x = (eater.x * eater.m + food.x * food.m) / m;
+    eater.y = (eater.y * eater.m + food.y * food.m) / m;
+  }
+  eater.m = m;
+  eater.r = eater.type === 'blackhole' || eater.type === 'star' ? radiusFor(eater.type, m) : Math.cbrt(eater.r ** 3 + (food.type === 'debris' ? 0 : food.r ** 3));
+  food.dead = true;
+  if (App.selectedId === food.id) App.selectedId = eater.id;
+  if (App.followId === food.id) App.followId = eater.id;
+}
+
+function shatter(u, a, b, rel) {
+  const M = a.m + b.m;
+  const vx = (a.vx * a.m + b.vx * b.m) / M, vy = (a.vy * a.m + b.vy * b.m) / M;
+  const cx = (a.x * a.m + b.x * b.m) / M, cy = (a.y * a.m + b.y * b.m) / M;
+  const k = 6, fragM = (M * 0.3) / k;
+  a.m = M * 0.7; a.r = Math.cbrt(a.r ** 3 + b.r ** 3 * 0.5); a.vx = vx; a.vy = vy; a.x = cx; a.y = cy; a.noHit = u.t + 0.6;
+  for (let i = 0; i < k; i++) {
+    const ang = (i / k) * Math.PI * 2 + Math.random() * 0.3, kick = rel * 0.35;
+    const f = makeBody({ type: 'debris', m: fragM, x: cx + Math.cos(ang) * (a.r + 3), y: cy + Math.sin(ang) * (a.r + 3), vx: vx + Math.cos(ang) * kick, vy: vy + Math.sin(ang) * kick });
+    f.noHit = u.t + 0.6;
+    addBody(u, f);
+  }
+  b.dead = true;
+  if (App.selectedId === b.id) App.selectedId = a.id;
+  App.flashes.push({ x: cx, y: cy, t0: performance.now(), dur: 900, kind: 'nova', r: 60 });
+  log(a.name + ' and ' + b.name + ' collided at ' + rel.toFixed(0) + ' u/s. ' + k + ' fragments.', 'crit');
+  for (const p of [a, b]) if (p.life) { log(p.life.species + ' on ' + p.name + ': extinct (impact).', 'crit'); p.life = null; }
+}
+
+function mouthPos(u, m) {
+  if (m.bodyId != null) {
+    const b = bodyById(u, m.bodyId);
+    if (b) { m.x = b.x + m.ox; m.y = b.y + m.oy; } else m.bodyId = null;
+  }
+  return m;
+}
+function wormholeTransit(u) {
+  for (const w of u.wormholes) {
+    const A = mouthPos(u, w.a), Bm = mouthPos(u, w.b);
+    for (const b of u.bodies) {
+      if (b.whCool > u.t || b.type === 'blackhole') continue;
+      if (w.a.bodyId === b.id || w.b.bodyId === b.id) continue;
+      for (const [from, to] of [[A, Bm], [Bm, A]]) {
+        if (Math.hypot(b.x - from.x, b.y - from.y) < w.r) {
+          const v = Math.hypot(b.vx, b.vy) || 1;
+          b.x = to.x + (b.vx / v) * (w.r + 4); b.y = to.y + (b.vy / v) * (w.r + 4);
+          b.whCool = u.t + 0.8; b.trail = [];
+          if (b.type !== 'debris') log(b.name + ' traversed the wormhole.', 'exotic');
+          break;
+        }
+      }
+    }
+  }
+}
+
+function quantumJitter(u, dtReal) {
+  const h = u.laws.h;
+  if (h < 3) return;
+  const s = Math.sqrt(h) * 0.05 * dtReal * 60;
+  for (const b of u.bodies) {
+    if (b.pinned || b.held) continue;
+    const k = s / Math.sqrt(Math.max(b.m, 0.05));
+    b.x += (Math.random() - 0.5) * k; b.y += (Math.random() - 0.5) * k;
+    if (h > 400 && Math.random() < 0.0015 * dtReal * 60 && b.type !== 'star') {
+      const ang = Math.random() * Math.PI * 2, d = rand(20, 60);
+      b.x += Math.cos(ang) * d; b.y += Math.sin(ang) * d; b.trail = [];
+      if (b.type !== 'debris') log(b.name + ' tunnelled ' + d.toFixed(0) + ' u. Planck constant ' + mult(h) + '.', 'exotic');
+    }
+  }
+}
+
+function escapes(u) {
+  const host = dominant(u);
+  const cx = host ? host.x : 0, cy = host ? host.y : 0;
+  for (const b of u.bodies) {
+    if (Math.hypot(b.x - cx, b.y - cy) > ESCAPE_DIST) {
+      b.dead = true; u.escaped++;
+      if (b.type !== 'debris') log(b.name + ' left the sector' + (b.life ? ', taking ' + b.life.species + ' with it' : '') + '.', 'warn');
+      if (App.selectedId === b.id) App.selectedId = null;
+      if (App.followId === b.id) App.followId = null;
+    }
+  }
+  u.bodies = u.bodies.filter((b) => !b.dead);
+}
+
+// ─── Life ───
+function luminosity(u, s) {
+  if (s.type === 'star') return Math.pow(s.m / MSUN, 3.5) * Math.pow(u.laws.G, 4) * u.heat;
+  if (s.type === 'neutron') return 0.002 * u.heat;
+  return 0;
+}
+function temperature(u, b) {
+  let flux = 0;
+  for (const s of u.bodies) {
+    if (s === b) continue;
+    const L = luminosity(u, s);
+    if (!L) continue;
+    flux += L / ((s.x - b.x) ** 2 + (s.y - b.y) ** 2 + 1);
+  }
+  let T = 288 * Math.pow(flux * L0 * L0, 0.25);
+  if (b.weather) T += b.weather.mode === 'rain' ? -6 : b.weather.mode === 'sun' ? 6 : -2;
+  return Math.max(3, T);
+}
+function habitability(u, b) {
+  const L = u.laws;
+  if (L.dims !== 3) return { h: 0, why: 'no stable atoms outside 3 spatial dimensions' };
+  if (L.h > 60) return { h: 0, why: 'Planck constant too large for chemistry' };
+  if (L.h < 0.05) return { h: 0, why: 'Planck constant too small for stable atoms' };
+  if (L.c < 0.2) return { h: 0, why: 'speed of light too low for stable chemistry' };
+  if (b.type === 'debris') return { h: 0, why: 'it is rubble' };
+  const tol = b.life ? b.life.genes.heat_tolerance : 0;
+  const lo = 255 - tol, hi = 325 + tol, T = b.temp;
+  let h = 1;
+  if (T < lo) h = clamp((T - (lo - 35)) / 35, 0, 1);
+  else if (T > hi) h = clamp((hi + 35 - T) / 35, 0, 1);
+  let why = h < 1 ? (T < lo ? 'too cold, ' + T.toFixed(0) + ' K' : 'too hot, ' + T.toFixed(0) + ' K') : '';
+  if (b.m < 0.01) { h *= 0.3; why = why || 'too small to hold an atmosphere'; }
+  return { h, why };
+}
+
+function lifeStep(u, dMyr) {
+  for (const b of u.bodies) {
+    if (!(b.type === 'planet' || b.type === 'moon' || b.type === 'debris')) continue;
+    b.temp = temperature(u, b);
+    if (b.weather) { b.weather.left -= dMyr; if (b.weather.left <= 0) b.weather = null; }
+    if (!b.life) {
+      if (b.type === 'planet' && b.m > 0.1 && Math.random() < 0.012 * dMyr && habitability(u, b).h > 0.9) {
+        seedLife(b, speciesName(), 1e6, 0);
+        log('Life emerged on ' + b.name + ': ' + b.life.species + '.', 'life');
+      }
+      continue;
+    }
+    const L = b.life, hab = habitability(u, b), K = 1e10 * clamp(b.m / 3, 0.05, 5);
+    if (hab.h > 0.05) {
+      L.pop += 0.7 * L.genes.fertility * hab.h * L.pop * (1 - L.pop / K) * dMyr;
+      L.pop = Math.max(L.pop, 1);
+      const gain = 0.09 * hab.h * L.genes.intelligence * dMyr * (L.pop > 1e7 ? 1 : 0.4);
+      L.iq = Math.min(10, L.iq + gain);
+      if (hab.h > 0.6) L.warned = false;
+    } else {
+      L.pop *= Math.exp(-1.6 * dMyr);
+    }
+    if (hab.h < 0.3 && !L.warned) { L.warned = true; log(L.species + ' on ' + b.name + ' are struggling: ' + hab.why + '.', 'warn'); }
+    if (b.weather && b.weather.mode === 'storm') L.pop *= Math.exp(-b.weather.intensity * 0.02 * dMyr);
+    const st = stageIndex(L.iq);
+    if (st > L.stage) { L.stage = st; log(L.species + ' on ' + b.name + ': ' + lc(STAGES[st][1]) + '.', 'life'); }
+    if (L.pop < 2) { log(L.species + ' on ' + b.name + ': extinct (' + (hab.why || 'storms') + ').', 'crit'); b.life = null; }
+  }
+}
+
+function stability(u) {
+  if (u.dead) return 0;
+  const L = u.laws;
+  let s = Math.exp(-Math.abs(Math.log10(L.G)) * 1.2) * Math.exp(-Math.abs(Math.log10(L.c)) * 0.6) * Math.exp(-Math.abs(Math.log10(L.h)) * 0.4);
+  if (L.dims !== 3) s *= 0.35;
+  s *= 1 - Math.max(0, L.de - 0.1) * 0.75;
+  if (u.dying) s *= 0.3;
+  return Math.round(clamp(s, 0, 1) * 100);
+}
+
+// ─── Time: snapshots and travel ───
+function cloneBody(b) {
+  return { ...b, trail: [], life: b.life ? { ...b.life, eco: [...b.life.eco], genes: { ...b.life.genes } } : null, weather: b.weather ? { ...b.weather } : null };
+}
+function snapshot(u) {
+  u.snaps.push({ t: u.t, heat: u.heat, bodies: u.bodies.map(cloneBody) });
+  if (u.snaps.length > SNAP_MAX) u.snaps.shift();
+}
+function restore(u, snap) {
+  u.t = snap.t; u.heat = snap.heat; u.bodies = snap.bodies.map(cloneBody);
+  u.lastSnap = Math.floor(myr(u) / SNAP_EVERY);
+  u.snaps = u.snaps.filter((s) => s.t <= snap.t);
+  if (!bodyById(u, App.selectedId)) App.selectedId = null;
+  if (!bodyById(u, App.followId)) App.followId = null;
+}
+function rewind(u, dMyr) {
+  const target = u.t - dMyr / MYR_PER_SEC;
+  const snap = [...u.snaps].reverse().find((s) => s.t <= target) || u.snaps[0];
+  if (!snap || snap.t >= u.t) { notice('No earlier state recorded yet.'); return 0; }
+  const back = (u.t - snap.t) * MYR_PER_SEC;
+  restore(u, snap);
+  log('Rewound ' + back.toFixed(1) + ' Myr.', 'exotic');
+  return back;
+}
+function advance(u, simDt, dtReal) {
+  const steps = Math.min(MAX_SUBSTEPS, Math.max(1, Math.ceil(simDt / SUBSTEP)));
+  const h = simDt / steps;
+  for (let i = 0; i < steps; i++) { stepPhysics(u, h); u.t += h; }
+  quantumJitter(u, dtReal);
+  escapes(u);
+  lifeStep(u, simDt * MYR_PER_SEC);
+  if (u.dying) {
+    u.heat = Math.max(0, u.heat - simDt * 0.08);
+    if (u.heat === 0 && !u.dead) { u.dead = true; log(u.name + ' has reached heat death. Nothing further will happen here.', 'crit'); }
+  }
+  const slot = Math.floor(myr(u) / SNAP_EVERY);
+  if (slot > u.lastSnap) { u.lastSnap = slot; snapshot(u); }
+}
+function fastForward(u, dMyr) {
+  let left = Math.min(dMyr, 60) / MYR_PER_SEC;
+  while (left > 0) { const s = Math.min(1, left); advance(u, s, 0); left -= s; }
+}
+
+// ─── Cosmic events ───
+function supernova(u, s) {
+  const remnant = s.m > 1600 ? 'blackhole' : 'neutron';
+  const name = s.name;
+  let sterilised = 0;
+  for (const b of u.bodies) {
+    if (b === s) continue;
+    const dx = b.x - s.x, dy = b.y - s.y, d = Math.hypot(dx, dy) + 1;
+    if (d < 420) { const k = (1 - d / 420) * 140 / Math.sqrt(Math.max(b.m, 0.2)); b.vx += dx / d * k; b.vy += dy / d * k; }
+    if (d < 280 && b.life) { log(b.life.species + ' on ' + b.name + ': sterilised by ' + name + '.', 'crit'); b.life = null; sterilised++; }
+  }
+  s.type = remnant; s.m = remnant === 'blackhole' ? s.m * 0.5 : s.m * 0.15; s.r = radiusFor(remnant, s.m);
+  App.flashes.push({ x: s.x, y: s.y, t0: performance.now(), dur: 2200, kind: 'nova', r: 420 });
+  log(name + ' went supernova. Remnant: ' + (remnant === 'blackhole' ? 'black hole' : 'neutron star') + '. ' + sterilised + ' biosphere(s) sterilised.', 'crit');
+  return sterilised;
+}
+function gammaBurst(u, x, y, duration) {
+  const targets = u.bodies.filter((b) => b.life);
+  let ang = Math.random() * Math.PI * 2;
+  if (targets.length && Math.random() < clamp((duration || 10) / 40, 0.15, 0.85)) {
+    const t = pickR(targets); ang = Math.atan2(t.y - y, t.x - x);
+  }
+  let hit = 0;
+  for (const b of u.bodies) {
+    if (!b.life) continue;
+    const a = Math.atan2(b.y - y, b.x - x);
+    let da = Math.abs(a - ang); if (da > Math.PI) da = 2 * Math.PI - da;
+    if (da < 0.12 && Math.hypot(b.x - x, b.y - y) < 2400) { log(b.life.species + ' on ' + b.name + ': sterilised by gamma-ray burst.', 'crit'); b.life = null; hit++; }
+  }
+  App.flashes.push({ x, y, t0: performance.now(), dur: 1600, kind: 'beam', ang });
+  log('Gamma-ray burst, ' + (duration || 10) + ' s. ' + (hit ? hit + ' biosphere(s) in the beam.' : 'The beam missed everything that matters.'), hit ? 'crit' : 'warn');
+  return hit;
+}
+function makeNebula(u, x, y) {
+  const n = 2600, p = new Float32Array(n * 5);
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, r = Math.abs(randn()) * 90;
+    p[i * 5] = x + Math.cos(a) * r * 1.6; p[i * 5 + 1] = y + Math.sin(a) * r;
+    p[i * 5 + 2] = NaN; p[i * 5 + 3] = NaN; p[i * 5 + 4] = Math.random();
+  }
+  const neb = { x, y, p, n, text: null };
+  u.nebulae.push(neb);
+  return neb;
+}
+function randn() { return Math.sqrt(-2 * Math.log(Math.random() + 1e-9)) * Math.cos(2 * Math.PI * Math.random()); }
+function shapeNebula(neb, text) {
+  const oc = document.createElement('canvas');
+  oc.width = 1400; oc.height = 260;
+  const o = oc.getContext('2d');
+  o.fillStyle = '#fff';
+  o.textAlign = 'center'; o.textBaseline = 'middle';
+  let size = 150;
+  o.font = '700 ' + size + 'px "Chakra Petch", sans-serif';
+  while (o.measureText(text).width > 1340 && size > 40) { size -= 6; o.font = '700 ' + size + 'px "Chakra Petch", sans-serif'; }
+  o.fillText(text, 700, 130);
+  const data = o.getImageData(0, 0, 1400, 260).data, pts = [];
+  for (let y = 0; y < 260; y += 2) for (let x = 0; x < 1400; x += 2) if (data[(y * 1400 + x) * 4 + 3] > 128) pts.push([x, y]);
+  if (!pts.length) return;
+  const scale = 820 / 1400;
+  for (let i = 0; i < neb.n; i++) {
+    const [px, py] = pts[Math.floor(Math.random() * pts.length)];
+    neb.p[i * 5 + 2] = neb.x + (px - 700) * scale + (Math.random() - 0.5) * 2;
+    neb.p[i * 5 + 3] = neb.y + (py - 130) * scale + (Math.random() - 0.5) * 2;
+  }
+  neb.text = text;
+}
+function nebulaStep(u, dt) {
+  const k = Math.min(1, dt * 1.4);
+  for (const neb of u.nebulae) {
+    const p = neb.p;
+    for (let i = 0; i < neb.n; i++) {
+      const j = i * 5;
+      if (!Number.isNaN(p[j + 2])) { p[j] += (p[j + 2] - p[j]) * k; p[j + 1] += (p[j + 3] - p[j + 1]) * k; }
+    }
+  }
+}
+
+// ─── Log ───
+function log(text, kind = 'info') {
+  const u = U();
+  const li = document.createElement('li');
+  li.dataset.kind = kind;
+  li.innerHTML = '<time>' + (u ? u.name + ' · T+' + myr(u).toFixed(2) + ' Myr' : '') + '</time>' + esc(text);
+  logEl.prepend(li);
+  while (logEl.children.length > 160) logEl.lastChild.remove();
+  App.logCount++;
+  logCount.textContent = App.logCount + ' events';
+}
+
+// ─── Terminal: GodMod API ───
+class PyError extends Error { constructor(type, msg) { super(msg); this.pyType = type; } }
+const err = (type, msg) => { throw new PyError(type, msg); };
+const fn = (name, params, f) => ({ kind: 'fn', name, params, f });
+const inst = (cls, data) => ({ kind: 'inst', cls, data });
+function cls(name, params, make, methods = {}, attrs = {}, statics = {}, repr) {
+  return { kind: 'class', name, params, make, methods, attrs, statics, repr };
+}
+let say = () => {};
+
+function needStr(v, what) { if (typeof v !== 'string') err('TypeError', what + ' must be a string'); return v; }
+function needNum(v, what) { if (typeof v !== 'number' || Number.isNaN(v)) err('TypeError', what + ' must be a number'); return v; }
+function handleUniverse(u) { return inst(GM.Universe, { uid: u.uid }); }
+function handleBody(u, b) { return inst(GM.CelestialBody, { uid: u.uid, id: b.id, pending: null }); }
+function liveUniverse(self) { const u = uByUid(self.data.uid); if (!u) err('RuntimeError', 'that universe no longer exists'); return u; }
+function liveBody(self) {
+  const d = self.data;
+  if (d.pending) err('RuntimeError', "body '" + d.pending.name + "' is not in a universe yet. Call universe.add_body() first.");
+  const u = uByUid(d.uid), b = u && bodyById(u, d.id);
+  if (!b) err('RuntimeError', 'that body no longer exists');
+  return { u, b };
+}
+function bodyArg(v, what) {
+  if (v && v.kind === 'inst' && v.cls === GM.CelestialBody) return liveBody(v);
+  if (typeof v === 'string') { const u = U(), b = findBody(u, v); if (!b) err('ValueError', "no body named '" + v + "' in " + u.name); return { u, b }; }
+  return err('TypeError', what + ' must be a CelestialBody or a body name');
+}
+function planetLife(self) {
+  const { u, b } = bodyArg(self.data.planet, 'planet');
+  return { u, b, L: b.life };
+}
+function setLaw(u, key, value) {
+  const def = LAWS.find((l) => l.key === key);
+  u.laws[key] = def.int ? clamp(Math.round(value), def.min, def.max) : clamp(value, def.min, def.max);
+  syncLaws();
+}
+function rateTo(r) {
+  let best = 0;
+  RATES.forEach((v, i) => { if (Math.abs(Math.log2(Math.max(v, 1e-3)) - Math.log2(Math.max(r, 1e-3))) < Math.abs(Math.log2(Math.max(RATES[best], 1e-3)) - Math.log2(Math.max(r, 1e-3)))) best = i; });
+  App.rateIdx = r <= 0 ? 0 : Math.max(1, best);
+}
+function curRate() { return App.paused ? 0 : RATES[App.rateIdx]; }
+
+const GM = {};
+
+GM.Universe = cls('Universe', ['name'], (name = 'Universe-' + App.nextUid) => {
+  needStr(name, 'name');
+  let u = uByName(name);
+  if (u) { say("Universe '" + u.name + "' attached (" + u.bodies.length + ' bodies, d=' + u.laws.dims + ').'); }
+  else {
+    u = makeUniverse(name);
+    App.multiverse.push(u);
+    bigBang(u, true);
+    say("Universe '" + name + "' created. Big Bang complete: " + u.bodies.length + ' bodies. Billing starts now.');
+    log("Universe '" + name + "' created.", 'exotic');
+  }
+  switchUniverse(App.multiverse.indexOf(u));
+  return handleUniverse(u);
+}, {
+  add_body: { params: ['body'], f(self, body) {
+    const u = liveUniverse(self);
+    if (!body || body.cls !== GM.CelestialBody) err('TypeError', 'add_body() expects a CelestialBody');
+    const d = body.data;
+    if (!d.pending) {
+      const where = uByUid(d.uid);
+      if (where === u && bodyById(u, d.id)) { say(bodyById(u, d.id).name + ' is already in ' + u.name + '.'); return null; }
+    }
+    const p = d.pending || { name: 'Unnamed', type: 'planet', mass: null };
+    const b = makeBody({ name: p.name, type: p.type, m: p.mass ?? undefined });
+    const host = dominant(u);
+    if (!host) { b.x = 0; b.y = 0; }
+    else if (b.type === 'moon') {
+      const parent = u.bodies.filter((x) => x.type === 'planet').sort((a, c) => c.m - a.m)[0] || host;
+      setOrbit(u, b, parent, parent.r + 8);
+    } else setOrbit(u, b, host, b.type === 'star' || b.type === 'blackhole' ? freeOrbit(u, host) + 200 : freeOrbit(u, host));
+    if (!addBody(u, b)) return null;
+    d.pending = null; d.uid = u.uid; d.id = b.id;
+    say(b.name + ' placed ' + (host && host !== b ? 'in orbit around ' + host.name + ' at ' + au(Math.hypot(b.x - host.x, b.y - host.y)) : 'at the centre of ' + u.name) + '.');
+    log(b.name + ' added to ' + u.name + '.');
+    return null;
+  } },
+  remove_body: { params: ['body'], f(self, body) {
+    const u = liveUniverse(self), { b } = bodyArg(body, 'body');
+    b.dead = true; u.bodies = u.bodies.filter((x) => !x.dead);
+    say(b.name + ' removed from ' + u.name + '. Hopefully it was not load-bearing.');
+    log(b.name + ' unmade.', 'warn');
+    return null;
+  } },
+  big_bang: { params: [], f(self) { const u = liveUniverse(self); bigBang(u); say('Big Bang in ' + u.name + ': ' + u.bodies.length + ' bodies. Previous contents discarded.'); return null; } },
+  heat_death: { params: [], f(self) {
+    const u = liveUniverse(self); u.dying = true; setLaw(u, 'de', 1);
+    say(u.name + ' is heading for heat death. Stars are dimming. Call big_bang() to start over.');
+    log(u.name + ': heat death initiated.', 'crit');
+    return null;
+  } },
+  info: { params: [], f(self) { const u = liveUniverse(self); return u.name + ': ' + u.bodies.length + ' bodies, d=' + u.laws.dims + ', T+' + myr(u).toFixed(2) + ' Myr, stability ' + stability(u) + '%'; } },
+}, {
+  name: (s) => liveUniverse(s).name,
+  bodies: (s) => { const u = liveUniverse(s); return u.bodies.filter((b) => b.type !== 'debris').map((b) => handleBody(u, b)); },
+  physical_laws: (s) => inst(GM.PhysicalLaws, { uid: s.data.uid }),
+}, {}, (s) => { const u = uByUid(s.data.uid); return u ? "<Universe '" + u.name + "': " + u.bodies.length + ' bodies, d=' + u.laws.dims + '>' : '<Universe (gone)>'; });
+
+GM.CelestialBody = cls('CelestialBody', ['name', 'type', 'mass'], (name, type = 'planet', mass) => {
+  needStr(name, 'name');
+  const kinds = ['planet', 'star', 'moon', 'blackhole'];
+  const t = String(type).toLowerCase().replace(/[\s_-]/g, '');
+  if (!kinds.includes(t)) err('ValueError', "type must be one of 'planet', 'star', 'moon', 'blackhole'");
+  const u = U(), found = findBody(u, name);
+  if (found) { say(found.name + ' found in ' + u.name + ' (' + found.type + ', m=' + found.m.toFixed(2) + ').'); return handleBody(u, found); }
+  say(name + ' created (' + t + '). Not yet placed: call universe.add_body(' + name.toLowerCase().replace(/\W/g, '') + ').');
+  return inst(GM.CelestialBody, { uid: null, id: null, pending: { name, type: t, mass: mass ?? null } });
+}, {
+  set_orbit: { params: ['orbiting_body_name', 'distance'], f(self, host, distance) {
+    const { u, b } = liveBody(self), h = bodyArg(host, 'orbiting_body_name').b;
+    if (h === b) err('ValueError', 'a body cannot orbit itself');
+    const dist = distance == null ? Math.hypot(b.x - h.x, b.y - h.y) : needNum(distance, 'distance');
+    const dd = clamp(dist > 5000 ? (dist / 1.496e11) * L0 : dist, h.r + b.r + 2, 3000);
+    setOrbit(u, b, h, dd, Math.atan2(b.y - h.y, b.x - h.x));
+    say(b.name + ' now orbits ' + h.name + ' at ' + au(dd) + ' (v = ' + circularV(u, h.m, dd).toFixed(1) + ' u/s).');
+    return null;
+  } },
+  collide: { params: ['other'], f(self, other) {
+    const { b } = liveBody(self), o = bodyArg(other, 'other').b;
+    const dx = o.x - b.x, dy = o.y - b.y, d = Math.hypot(dx, dy) || 1, v = 120;
+    b.vx = o.vx + dx / d * v; b.vy = o.vy + dy / d * v;
+    say(b.name + ' and ' + o.name + ' are on a collision course. Impact in about ' + (d / v).toFixed(1) + ' s of simulation time.');
+    return null;
+  } },
+  set_mass: { params: ['mass'], f(self, mass) {
+    const { b } = liveBody(self), m0 = b.m; b.m = clamp(needNum(mass, 'mass'), 0.001, 1e6); b.r *= Math.cbrt(b.m / m0);
+    say(b.name + ' mass set to ' + b.m.toFixed(2) + '.'); return null;
+  } },
+  info: { params: [], f(self) { const { b } = liveBody(self); return b.name + ': ' + b.type + ', m=' + b.m.toFixed(2) + ', T=' + b.temp.toFixed(0) + ' K' + (b.life ? ', ' + b.life.species + ' (' + big(b.life.pop) + ')' : ''); } },
+}, {
+  name: (s) => s.data.pending ? s.data.pending.name : liveBody(s).b.name,
+  type: (s) => s.data.pending ? s.data.pending.type : liveBody(s).b.type,
+  mass: (s) => s.data.pending ? s.data.pending.mass : +liveBody(s).b.m.toFixed(3),
+  temperature: (s) => +liveBody(s).b.temp.toFixed(1),
+  velocity: (s) => { const { b } = liveBody(s); return +Math.hypot(b.vx, b.vy).toFixed(2); },
+}, {}, (s) => {
+  if (s.data.pending) return "<CelestialBody '" + s.data.pending.name + "' " + s.data.pending.type + ' (unplaced)>';
+  const u = uByUid(s.data.uid), b = u && bodyById(u, s.data.id);
+  return b ? "<CelestialBody '" + b.name + "' " + b.type + ' m=' + b.m.toFixed(2) + ' T=' + b.temp.toFixed(0) + 'K>' : '<CelestialBody (destroyed)>';
+});
+
+GM.LifeForm = cls('LifeForm', ['name', 'planet'], (name, planet) => {
+  needStr(name, 'name');
+  const { b } = bodyArg(planet, 'planet');
+  if (b.life && b.life.species.toLowerCase() === name.toLowerCase()) say(b.life.species + ' found on ' + b.name + ': ' + big(b.life.pop) + ', ' + lc(stageOf(b.life.iq)) + '.');
+  else if (b.life) { if (!b.life.eco.includes(name)) b.life.eco.push(name); say(name + ' registered on ' + b.name + ', alongside the ' + b.life.species + '.'); }
+  else { seedLife(b, name, 0, 0); say(name + ' registered on ' + b.name + '. Population 0: call create_population().'); }
+  return inst(GM.LifeForm, { planet: planet, species: b.life ? b.life.species : name, name });
+}, {
+  create_population: { params: ['size'], f(self, size) {
+    const { b } = planetLife(self); needNum(size, 'size');
+    if (!b.life) seedLife(b, self.data.name, 0, 0);
+    if (b.life.species !== self.data.name && size > b.life.pop) { b.life.species = self.data.name; log(self.data.name + ' are now the dominant species on ' + b.name + '.', 'life'); }
+    b.life.pop = Math.max(1, size); b.life.warned = false;
+    say(big(size) + ' ' + self.data.name + ' on ' + b.name + '.'); return null;
+  } },
+  evolve: { params: ['years', 'intelligence_level'], f(self, years, level) {
+    const { b } = planetLife(self);
+    if (!b.life) err('RuntimeError', self.data.name + ' have no population to evolve');
+    const L = b.life, before = L.iq;
+    if (level != null) L.iq = clamp(needNum(level, 'intelligence_level'), 0, 10);
+    else L.iq = clamp(L.iq + needNum(years ?? 1e6, 'years') / 1e6 * 0.09 * L.genes.intelligence, 0, 10);
+    const st = stageIndex(L.iq);
+    if (st !== L.stage) { L.stage = st; log(L.species + ' on ' + b.name + ': ' + lc(STAGES[st][1]) + '.', 'life'); }
+    say(L.species + ' on ' + b.name + ': intelligence ' + before.toFixed(1) + ' → ' + L.iq.toFixed(1) + ' (' + stageOf(L.iq) + ').' + (L.iq >= 10 ? ' They will want console access eventually.' : ''));
+    return null;
+  } },
+  extinct_population: { params: [], f(self) {
+    const { b } = planetLife(self); if (!b.life) { say('Nothing left to remove.'); return null; }
+    log(b.life.species + ' on ' + b.name + ': extinct (by operator).', 'crit'); b.life = null; say('Done. Logged.'); return null;
+  } },
+}, {
+  population: (s) => { const L = planetLife(s).L; return L ? Math.round(L.pop) : 0; },
+  intelligence: (s) => { const L = planetLife(s).L; return L ? +L.iq.toFixed(2) : 0; },
+  stage: (s) => { const L = planetLife(s).L; return L ? stageOf(L.iq) : 'extinct'; },
+}, {}, (s) => { try { const { b, L } = planetLife(s); return L ? "<LifeForm '" + s.data.name + "' on " + b.name + ': ' + big(L.pop) + ', intelligence ' + L.iq.toFixed(1) + '>' : "<LifeForm '" + s.data.name + "' (extinct)>"; } catch (e) { return "<LifeForm '" + s.data.name + "' (planet gone)>"; } });
+
+function weatherSet(self, mode, amount) {
+  const { b } = bodyArg(self.data.planet, 'planet');
+  if (mode === 'storm') { const k = clamp(needNum(amount, 'intensity'), 1, 10); b.weather = { mode, left: 3, intensity: k }; return b; }
+  const myrs = clamp(needNum(amount, 'duration') / 20, 0.25, 50);
+  b.weather = { mode, left: myrs, intensity: 0 };
+  return b;
+}
+GM.Weather = cls('Weather', ['planet'], (planet) => { const { b } = bodyArg(planet, 'planet'); say('Weather control attached to ' + b.name + '.'); return inst(GM.Weather, { planet }); }, {
+  set_rain: { params: ['duration'], f(self, d) { const b = weatherSet(self, 'rain', d); say('Rain on ' + b.name + ' for ' + d + ' min (' + b.weather.left.toFixed(1) + ' Myr at current compression). Surface −6 K.'); return null; } },
+  set_sun: { params: ['duration'], f(self, d) { const b = weatherSet(self, 'sun', d); say('Clear skies on ' + b.name + ' for ' + d + ' min (' + b.weather.left.toFixed(1) + ' Myr). Surface +6 K.'); return null; } },
+  create_storm: { params: ['intensity'], f(self, k) { const b = weatherSet(self, 'storm', k); say('Storm, intensity ' + b.weather.intensity + ', on ' + b.name + '. Expect population losses.'); return null; } },
+}, {}, {}, (s) => '<Weather ' + (typeof s.data.planet === 'string' ? s.data.planet : 'controller') + '>');
+
+GM.BlackHole = cls('BlackHole', ['name', 'mass'], (name = autoName('blackhole'), mass = 5000) => {
+  needStr(name, 'name');
+  say("Black hole '" + name + "' (m=" + needNum(mass, 'mass') + ') created. Not yet placed: call place_black_hole().');
+  return inst(GM.BlackHole, { name, mass, uid: null, id: null });
+}, {
+  place_black_hole: { params: ['location'], f(self, location = 'random') {
+    const u = U(), d = self.data;
+    if (d.id && bodyById(u, d.id)) err('RuntimeError', d.name + ' is already placed');
+    const b = makeBody({ name: d.name, type: 'blackhole', m: d.mass });
+    const loc = String(location);
+    const near = findBody(u, loc.replace(/^near\s+/i, ''));
+    const xy = loc.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+    let where;
+    if (/^cent(er|re)$/i.test(loc)) { const h = dominant(u); b.x = h ? h.x : 0; b.y = h ? h.y : 0; where = 'the centre of ' + u.name; }
+    else if (near) { const a = Math.random() * Math.PI * 2; b.x = near.x + Math.cos(a) * 45; b.y = near.y + Math.sin(a) * 45; b.vx = near.vx; b.vy = near.vy; where = '45 u from ' + near.name; }
+    else if (xy) { b.x = +xy[1]; b.y = +xy[2]; where = '(' + xy[1] + ', ' + xy[2] + ')'; }
+    else { const h = dominant(u); if (h) setOrbit(u, b, h, freeOrbit(u, h) + 240); where = 'the outer system'; }
+    if (!addBody(u, b)) return null;
+    d.uid = u.uid; d.id = b.id;
+    say(d.name + ' placed at ' + where + '. Local real estate values may be affected.');
+    log('Black hole ' + d.name + ' placed at ' + where + '.', 'warn');
+    return null;
+  } },
+  consume: { params: ['object'], f(self, object) {
+    const d = self.data, u = uByUid(d.uid), bh = u && bodyById(u, d.id);
+    if (!bh) err('RuntimeError', d.name + ' has not been placed');
+    const { b } = bodyArg(object, 'object');
+    if (b === bh) err('ValueError', 'a black hole cannot consume itself');
+    b.x = bh.x; b.y = bh.y; collide(u, bh, b); u.bodies = u.bodies.filter((x) => !x.dead);
+    say(d.name + ' consumed ' + b.name + '. Mass now ' + bh.m.toFixed(0) + '.'); return null;
+  } },
+}, { name: (s) => s.data.name, mass: (s) => s.data.mass }, {}, (s) => "<BlackHole '" + s.data.name + "' m=" + s.data.mass + (s.data.id ? '' : ' (unplaced)') + '>');
+
+function lawsOf(self) { return self.data.uid ? liveUniverse(self) : U(); }
+GM.PhysicalLaws = cls('PhysicalLaws', [], () => inst(GM.PhysicalLaws, { uid: U().uid }), {
+  set_gravitational_constant: { params: ['value'], f(self, v) {
+    const u = lawsOf(self); setLaw(u, 'G', needNum(v, 'value') / REAL.G);
+    say('G = ' + sci(u.laws.G * REAL.G) + ' ' + LAWS[0].unit + ' (' + mult(u.laws.G) + '). Stellar output ' + mult(Math.pow(u.laws.G, 4)) + ', since L ∝ G⁴.');
+    log('G set to ' + mult(u.laws.G) + '.', 'warn'); return null;
+  } },
+  set_speed_of_light: { params: ['value'], f(self, v) {
+    const u = lawsOf(self); setLaw(u, 'c', needNum(v, 'value') / REAL.c);
+    say('c = ' + sci(u.laws.c * REAL.c) + ' m/s (' + mult(u.laws.c) + ').' + (u.laws.c < 0.5 ? ' Planets are now relativistic. Photons are complying.' : ''));
+    log('c set to ' + mult(u.laws.c) + '.', 'warn'); return null;
+  } },
+  set_planck_constant: { params: ['value'], f(self, v) {
+    const u = lawsOf(self); setLaw(u, 'h', needNum(v, 'value') / REAL.h);
+    say('h = ' + sci(u.laws.h * REAL.h) + ' J s (' + mult(u.laws.h) + ').' + (u.laws.h > 3 ? ' Quantum uncertainty now visible at planetary scale.' : ''));
+    log('h set to ' + mult(u.laws.h) + '.', 'warn'); return null;
+  } },
+  reset: { params: [], f(self) { const u = lawsOf(self); LAWS.forEach((l) => { u.laws[l.key] = l.def; }); u.dying = false; syncLaws(); say('Physical laws of ' + u.name + ' restored to factory values.'); return null; } },
+}, {
+  G: (s) => lawsOf(s).laws.G * REAL.G, c: (s) => lawsOf(s).laws.c * REAL.c, h: (s) => lawsOf(s).laws.h * REAL.h,
+  dimensions: (s) => lawsOf(s).laws.dims,
+}, {}, (s) => { const u = lawsOf(s); return '<PhysicalLaws of ' + u.name + ': G ' + mult(u.laws.G) + ', c ' + mult(u.laws.c) + ', h ' + mult(u.laws.h) + ', d=' + u.laws.dims + '>'; });
+
+GM.Time = cls('Time', [], () => inst(GM.Time, {}), {
+  speed_up: { params: ['factor'], f(self, k) { rateTo(RATES[App.rateIdx] * needNum(k, 'factor')); App.paused = false; say('Time rate ' + '×' + RATES[App.rateIdx] + '.'); return null; } },
+  slow_down: { params: ['factor'], f(self, k) { rateTo(RATES[App.rateIdx] / needNum(k, 'factor')); say('Time rate ×' + RATES[App.rateIdx] + '.'); return null; } },
+  pause: { params: [], f() { App.paused = true; say('Time paused.'); return null; } },
+  resume: { params: [], f() { App.paused = false; if (!App.rateIdx) App.rateIdx = 3; say('Time resumed.'); return null; } },
+  travel: { params: ['year'], f(self, year) {
+    const u = U(), nowY = (START_GYR * 1e3 + myr(u)) * 1e6, target = needNum(year, 'year');
+    const dMyr = (target - nowY) / 1e6;
+    if (Math.abs(dMyr) < 0.01) { say('Already there.'); return null; }
+    if (dMyr < 0) { const back = rewind(u, -dMyr); say(back ? 'Restored state from ' + back.toFixed(2) + ' Myr ago (nearest snapshot).' : 'No snapshot that old. History only starts when you start watching.'); }
+    else { fastForward(u, dMyr); say('Fast-forwarded ' + Math.min(dMyr, 60).toFixed(2) + ' Myr' + (dMyr > 60 ? ' (capped at 60 per call).' : '.')); }
+    return null;
+  } },
+}, { rate: () => curRate(), year: () => Math.round((START_GYR * 1e3 + myr(U())) * 1e6) }, {}, () => '<Time ×' + curRate() + '>');
+
+GM.QuantumMechanics = cls('QuantumMechanics', [], () => inst(GM.QuantumMechanics, {}), {
+  create_particle: { params: ['name', 'spin'], f(self, name, spin = 0.5) { needStr(name, 'name'); App.quantum.set(name, { spin: needNum(spin, 'spin'), state: null, partner: null }); say("Particle '" + name + "' created, spin " + spin + '. State: undetermined until observed.'); return null; } },
+  entangle: { params: ['particle1', 'particle2'], f(self, a, b) {
+    const p = App.quantum.get(a), q = App.quantum.get(b);
+    if (!p || !q) err('ValueError', 'create both particles first');
+    p.partner = b; q.partner = a; p.state = q.state = null;
+    say(a + ' and ' + b + ' entangled. Measuring one will settle the other, at any distance.'); return null;
+  } },
+  collapse_wave_function: { params: ['particle'], f(self, a) {
+    const p = App.quantum.get(a); if (!p) err('ValueError', "no particle named '" + a + "'");
+    if (!p.state) {
+      p.state = Math.random() < 0.5 ? 'up' : 'down';
+      if (p.partner) { const q = App.quantum.get(p.partner); if (q) q.state = p.state === 'up' ? 'down' : 'up'; }
+    }
+    say(a + ' collapsed: ' + p.state + '.' + (p.partner ? ' ' + p.partner + ' is now ' + (p.state === 'up' ? 'down' : 'up') + '.' : ''));
+    return p.state;
+  } },
+}, {}, {}, () => '<QuantumMechanics: ' + App.quantum.size + ' particles>');
+
+function shiftLaw(key, label, amount, sign) {
+  const u = U(), before = u.laws[key], a = needNum(amount, 'amount');
+  setLaw(u, key, before + sign * (a > 1 ? a / 100 : a));
+  say(label + ' ' + Math.round(before * 100) + '% → ' + Math.round(u.laws[key] * 100) + '%.' + (key === 'de' && u.laws[key] > 0.6 ? ' Expansion will start pulling systems apart.' : ''));
+  log(label + ' ' + Math.round(u.laws[key] * 100) + '%.', 'warn');
+  return null;
+}
+GM.DarkMatter = cls('DarkMatter', [], () => inst(GM.DarkMatter, {}), {
+  increase_density: { params: ['amount'], f: (s, a) => shiftLaw('dm', 'Dark matter density', a, 1) },
+  decrease_density: { params: ['amount'], f: (s, a) => shiftLaw('dm', 'Dark matter density', a, -1) },
+}, { density: () => U().laws.dm }, {}, () => '<DarkMatter ' + Math.round(U().laws.dm * 100) + '%>');
+GM.DarkEnergy = cls('DarkEnergy', [], () => inst(GM.DarkEnergy, {}), {
+  increase_intensity: { params: ['amount'], f: (s, a) => shiftLaw('de', 'Dark energy intensity', a, 1) },
+  decrease_intensity: { params: ['amount'], f: (s, a) => shiftLaw('de', 'Dark energy intensity', a, -1) },
+}, { intensity: () => U().laws.de }, {}, () => '<DarkEnergy ' + Math.round(U().laws.de * 100) + '%>');
+
+function lifeBySpecies(name) {
+  const n = String(name).toLowerCase();
+  for (const u of App.multiverse) for (const b of u.bodies) if (b.life && (b.life.species.toLowerCase() === n || b.life.eco.some((e) => e.toLowerCase() === n))) return b;
+  return null;
+}
+GM.GeneticCode = cls('GeneticCode', ['organism'], (organism) => {
+  needStr(organism, 'organism');
+  const b = lifeBySpecies(organism);
+  say('Genome of ' + organism + ' opened' + (b ? ' (' + b.name + ').' : '. No living population found; edits will be recorded only.'));
+  return inst(GM.GeneticCode, { organism });
+}, {
+  edit_gene: { params: ['gene', 'new_value'], f(self, gene, value) {
+    needStr(gene, 'gene');
+    const b = lifeBySpecies(self.data.organism), L = b && b.life;
+    if (L && L.species.toLowerCase() === self.data.organism.toLowerCase() && gene in L.genes) {
+      const v = needNum(Number(value), 'new_value');
+      L.genes[gene] = gene === 'heat_tolerance' ? clamp(v, 0, 300) : clamp(v, 0.1, 10);
+      const eff = { heat_tolerance: 'habitable band widened by ' + L.genes.heat_tolerance + ' K', fertility: 'growth rate ' + mult(L.genes.fertility), intelligence: 'cognitive development ' + mult(L.genes.intelligence) }[gene];
+      say(self.data.organism + ': ' + gene + ' = ' + value + '. Effect: ' + eff + '.');
+    } else say(self.data.organism + ': ' + gene + ' = ' + JSON.stringify(value) + '. No measurable effect. Known genes: heat_tolerance, fertility, intelligence.');
+    return null;
+  } },
+  clone: { params: [], f(self) {
+    const b = lifeBySpecies(self.data.organism);
+    if (b && b.life) b.life.pop *= 1.1;
+    const n = self.data.organism + ' (clone)';
+    say(n + ' created.' + (b ? ' Population of ' + b.name + ' +10%.' : '')); return n;
+  } },
+  splice: { params: ['other_organism'], f(self, other) {
+    needStr(other, 'other_organism');
+    const n = self.data.organism + '–' + other + ' hybrid', b = lifeBySpecies(self.data.organism);
+    if (b && b.life && !b.life.eco.includes(n)) b.life.eco.push(n);
+    say(n + ' created' + (b ? ' and added to the ecosystem of ' + b.name : '') + '. Nobody asked for this.'); return n;
+  } },
+}, { organism: (s) => s.data.organism }, {}, (s) => '<GeneticCode ' + s.data.organism + '>');
+
+GM.Ecosystem = cls('Ecosystem', ['planet'], (planet) => { const { b } = bodyArg(planet, 'planet'); say('Ecosystem of ' + b.name + ': ' + (b.life ? b.life.eco.join(', ') : 'empty') + '.'); return inst(GM.Ecosystem, { planet }); }, {
+  add_species: { params: ['species'], f(self, sp) {
+    needStr(sp, 'species'); const { b } = bodyArg(self.data.planet, 'planet');
+    if (!b.life) seedLife(b, sp, 1e6, 0); else if (!b.life.eco.includes(sp)) b.life.eco.push(sp);
+    say(sp + ' added to the ecosystem of ' + b.name + '.'); return null;
+  } },
+  remove_species: { params: ['species'], f(self, sp) {
+    const { b } = bodyArg(self.data.planet, 'planet');
+    if (!b.life || !b.life.eco.includes(sp)) { say(sp + ' not found on ' + b.name + '.'); return null; }
+    b.life.eco = b.life.eco.filter((e) => e !== sp);
+    if (b.life.species === sp) { log(sp + ' on ' + b.name + ': removed by operator.', 'crit'); if (b.life.eco.length) { b.life.species = b.life.eco[0]; b.life.iq = Math.min(b.life.iq, 3); } else b.life = null; }
+    say(sp + ' removed from ' + b.name + '.'); return null;
+  } },
+}, { species: (s) => { const { b } = bodyArg(s.data.planet, 'planet'); return b.life ? [...b.life.eco] : []; } }, {}, () => '<Ecosystem>');
+
+const energyStatics = {
+  create_energy_source: fn('create_energy_source', ['type', 'output'], (type, output) => { needStr(type, 'type'); say(type + ' energy source online: ' + needNum(output, 'output') + ' GW.'); return null; }),
+  convert_matter_to_energy: fn('convert_matter_to_energy', ['mass'], (mass) => {
+    const c = U().laws.c * REAL.c, E = needNum(mass, 'mass') * c * c;
+    say(mass + ' kg → ' + sci(E) + ' J at the current c (' + sci(c) + ' m/s).'); return E;
+  }),
+};
+GM.Energy = cls('Energy', [], () => inst(GM.Energy, {}), Object.fromEntries(Object.entries(energyStatics).map(([k, v]) => [k, { params: v.params, f: (s, ...a) => v.f(...a) }])), {}, energyStatics, () => '<Energy>');
+
+const cosmicStatics = {
+  supernova: fn('supernova', ['star_name'], (name) => {
+    const { u, b } = bodyArg(name, 'star_name');
+    if (b.type !== 'star') err('ValueError', b.name + ' is not a star');
+    supernova(u, b); say(b.name + ' went supernova.'); return null;
+  }),
+  gamma_ray_burst: fn('gamma_ray_burst', ['duration'], (duration = 10) => {
+    const u = U(), s = pickR(stars(u)) || { x: 0, y: 0 };
+    const hit = gammaBurst(u, s.x, s.y, needNum(duration, 'duration'));
+    say('Gamma-ray burst, ' + duration + ' s. ' + (hit ? hit + ' biosphere(s) sterilised.' : 'No biospheres in the beam.')); return null;
+  }),
+};
+GM.CosmicEvent = cls('CosmicEvent', [], () => inst(GM.CosmicEvent, { neb: null }), {
+  create_nebula: { params: ['location'], f(self, location = 'random') {
+    const u = U(), loc = String(location), b = findBody(u, loc), h = dominant(u) || { x: 0, y: 0 };
+    let x, y, where;
+    if (b) { x = b.x + 260; y = b.y - 200; where = 'near ' + b.name; }
+    else if (/alpha\s*centauri/i.test(loc)) { x = h.x + 80; y = h.y - 760; where = 'toward Alpha Centauri, 4.37 ly out'; }
+    else { const a = Math.random() * Math.PI * 2; x = h.x + Math.cos(a) * 700; y = h.y + Math.sin(a) * 700; where = 'at the edge of the sector'; }
+    self.data.neb = makeNebula(u, x, y);
+    self.data.uid = u.uid;
+    say('Nebula formed ' + where + ': ' + self.data.neb.n + ' gas clouds.');
+    log('Nebula formed ' + where + '.', 'exotic');
+    App.cam.target = { x, y, zoom: Math.min(App.cam.zoom, fitZoom() * 0.75) };
+    return null;
+  } },
+  shape_nebula: { params: ['shape'], f(self, shape) {
+    needStr(shape, 'shape');
+    if (!self.data.neb) err('RuntimeError', 'create_nebula() first');
+    shapeNebula(self.data.neb, shape);
+    say('Nebula reshaped: "' + shape + '". Legible from several light-years away.');
+    log('Nebula now reads "' + shape + '".', 'exotic');
+    const n = self.data.neb, z = Math.min(fitZoom(), (App.W * 0.8) / 840);
+    App.cam.target = { x: n.x, y: n.y, zoom: z };
+    App.followId = null;
+    return null;
+  } },
+  supernova: { params: ['star_name'], f: (s, n) => cosmicStatics.supernova.f(n) },
+  gamma_ray_burst: { params: ['duration'], f: (s, d) => cosmicStatics.gamma_ray_burst.f(d) },
+}, {}, cosmicStatics, () => '<CosmicEvent>');
+
+GM.Multiverse = cls('Multiverse', [], () => inst(GM.Multiverse, {}), {
+  create_universe: { params: ['name'], f(self, name) {
+    needStr(name, 'name');
+    if (uByName(name)) err('ValueError', "a universe named '" + name + "' already exists");
+    const u = makeUniverse(name); App.multiverse.push(u); bigBang(u, true);
+    say("Universe '" + name + "' added to the multiverse (" + App.multiverse.length + ' total). Switch with the tabs or Universe(name).');
+    log("Universe '" + name + "' created.", 'exotic'); renderUnis(); return handleUniverse(u);
+  } },
+  merge_universes: { params: ['universe1', 'universe2'], f(self, a, b) {
+    const ua = a && a.cls === GM.Universe ? liveUniverse(a) : uByName(a), ub = b && b.cls === GM.Universe ? liveUniverse(b) : uByName(b);
+    if (!ua || !ub) err('ValueError', 'both universes must exist');
+    if (ua === ub) err('ValueError', 'a universe cannot merge with itself');
+    const off = 1100;
+    for (const x of ub.bodies) { x.x += off; x.trail = []; ua.bodies.push(x); }
+    for (const n of ub.nebulae) { for (let i = 0; i < n.n; i++) { n.p[i * 5] += off; n.p[i * 5 + 2] += off; } n.x += off; ua.nebulae.push(n); }
+    LAWS.forEach((l) => { ua.laws[l.key] = l.int ? Math.round((ua.laws[l.key] + ub.laws[l.key]) / 2) : (ua.laws[l.key] + ub.laws[l.key]) / 2; });
+    const old = ua.name; ua.name = ua.name + '+' + ub.name;
+    App.multiverse.splice(App.multiverse.indexOf(ub), 1);
+    switchUniverse(App.multiverse.indexOf(ua));
+    say(old + ' and ' + ub.name + ' merged into ' + ua.name + '. Constants averaged. Reality will adjust.');
+    log(ua.name + ': universes merged.', 'exotic'); return handleUniverse(ua);
+  } },
+  switch: { params: ['name'], f(self, name) { const u = uByName(name); if (!u) err('ValueError', "no universe named '" + name + "'"); switchUniverse(App.multiverse.indexOf(u)); say('Now observing ' + u.name + '.'); return handleUniverse(u); } },
+}, { universes: () => App.multiverse.map((u) => u.name) }, {}, () => '<Multiverse: ' + App.multiverse.length + ' universes>');
+
+GM.Dimension = cls('Dimension', ['universe'], (universe) => {
+  const u = universe && universe.cls === GM.Universe ? liveUniverse(universe) : U();
+  say('Dimension controller attached to ' + u.name + ' (d=' + u.laws.dims + ').'); return inst(GM.Dimension, { uid: u.uid });
+}, {
+  add_dimension: { params: [], f(self) {
+    const u = liveUniverse(self);
+    if (u.laws.dims >= 11) { say(u.name + ' already has 11 dimensions. String theory stops returning calls after that.'); return null; }
+    setLaw(u, 'dims', u.laws.dims + 1); dimsNote(u); return null;
+  } },
+  remove_dimension: { params: [], f(self) {
+    const u = liveUniverse(self);
+    if (u.laws.dims <= 2) { say('Cannot go below 2 dimensions in this build. Flatland is as flat as it gets.'); return null; }
+    setLaw(u, 'dims', u.laws.dims - 1); dimsNote(u); return null;
+  } },
+}, { count: (s) => liveUniverse(s).laws.dims }, {}, (s) => '<Dimension d=' + liveUniverse(s).laws.dims + '>');
+function dimsNote(u) {
+  const d = u.laws.dims;
+  const m = d === 3 ? 'Orbits are stable again.' : d > 3 ? 'Gravity now falls off as 1/r' + String(d - 1).split('').map((c) => SUP[c]).join('') + '. Closed orbits are unstable above 3 dimensions (Ehrenfest, 1917).' : 'Gravity now falls off as 1/r. Orbits hold; atoms do not.';
+  say(u.name + ' now has ' + d + ' spatial dimensions. ' + m);
+  log(u.name + ': ' + d + ' spatial dimensions.', 'warn');
+}
+
+GM.Wormhole = cls('Wormhole', ['entrance', 'exit'], (entrance, exit) => {
+  const u = U();
+  const mouth = (v) => {
+    const b = typeof v === 'string' ? findBody(u, v) : v && v.cls === GM.CelestialBody ? liveBody(v).b : null;
+    if (b) { const a = Math.random() * Math.PI * 2, d = b.r + 26; return { bodyId: b.id, ox: Math.cos(a) * d, oy: Math.sin(a) * d, x: b.x, y: b.y, label: b.name }; }
+    const a = Math.random() * Math.PI * 2; return { bodyId: null, ox: 0, oy: 0, x: Math.cos(a) * 600, y: Math.sin(a) * 600, label: String(v) };
+  };
+  const w = { a: mouth(entrance), b: mouth(exit), r: 12 };
+  u.wormholes.push(w);
+  say('Wormhole open: ' + w.a.label + ' ⟷ ' + w.b.label + '. Keep extremities inside the throat.');
+  log('Wormhole ' + w.a.label + ' ⟷ ' + w.b.label + ' opened.', 'exotic');
+  return inst(GM.Wormhole, { uid: u.uid, w });
+}, {
+  traverse: { params: ['object'], f(self, object) {
+    const { u, b } = bodyArg(object, 'object'), w = self.data.w, to = mouthPos(u, w.b);
+    b.x = to.x + w.r + b.r + 6; b.y = to.y; b.trail = []; b.whCool = u.t + 0.8;
+    say(b.name + ' traversed ' + w.a.label + ' → ' + w.b.label + '.'); log(b.name + ' traversed the wormhole.', 'exotic'); return null;
+  } },
+}, {}, {}, (s) => '<Wormhole ' + s.data.w.a.label + ' ⟷ ' + s.data.w.b.label + '>');
+
+const MODULE = { kind: 'module', name: 'godmod', members: GM };
+
+const BUILTINS = {
+  print: fn('print', ['*'], (...a) => { say(a.map((v) => typeof v === 'string' ? v : repr(v)).join(' ')); return null; }),
+  help: fn('help', ['obj'], (obj) => { say(helpText(obj)); return null; }),
+  clear: fn('clear', [], () => { termOut.innerHTML = ''; return null; }),
+  bodies: fn('bodies', [], () => { const u = U(); say(u.bodies.filter((b) => b.type !== 'debris').map((b) => b.name + ' (' + b.type + (b.life ? ', ' + b.life.species : '') + ')').join('\n') || '(none)'); return null; }),
+  universes: fn('universes', [], () => App.multiverse.map((u) => u.name)),
+  len: fn('len', ['obj'], (o) => { if (Array.isArray(o) || typeof o === 'string') return o.length; return err('TypeError', 'object has no len()'); }),
+  dir: fn('dir', ['obj'], (o) => {
+    if (o && o.kind === 'module') return Object.keys(GM);
+    if (o && o.kind === 'inst') return [...Object.keys(o.cls.methods), ...Object.keys(o.cls.attrs)];
+    if (o && o.kind === 'class') return [...Object.keys(o.methods), ...Object.keys(o.statics)];
+    return [...App.vars.keys()];
+  }),
+  exit: fn('exit', [], () => { say('There is no exit from the operator seat. Closing the tab works.'); return null; }),
+};
+BUILTINS.quit = BUILTINS.exit;
+
+// ─── Terminal: tokenizer, parser, evaluator ───
+function tokenize(src) {
+  const toks = []; let i = 0;
+  while (i < src.length) {
+    const ch = src[i];
+    if (/\s/.test(ch)) { i++; continue; }
+    if (ch === '#') break;
+    const rest = src.slice(i);
+    let m;
+    if ((m = rest.match(/^(\d[\d_]*(\.[\d_]+)?([eE][+-]?\d+)?|\.\d+([eE][+-]?\d+)?)/))) { toks.push({ t: 'num', v: parseFloat(m[0].replace(/_/g, '')) }); i += m[0].length; continue; }
+    if (ch === '"' || ch === "'") {
+      let j = i + 1, s = '';
+      while (j < src.length && src[j] !== ch) { if (src[j] === '\\' && j + 1 < src.length) { j++; s += { n: '\n', t: '\t' }[src[j]] || src[j]; } else s += src[j]; j++; }
+      if (j >= src.length) err('SyntaxError', 'unterminated string literal');
+      toks.push({ t: 'str', v: s }); i = j + 1; continue;
+    }
+    if ((m = rest.match(/^[A-Za-z_]\w*/))) { toks.push({ t: 'id', v: m[0] }); i += m[0].length; continue; }
+    if ('().,=[]-+*/'.includes(ch)) { toks.push({ t: 'p', v: ch }); i++; continue; }
+    err('SyntaxError', "invalid character '" + ch + "'");
+  }
+  return toks;
+}
+function parse(toks) {
+  let i = 0;
+  const peek = (v) => toks[i] && toks[i].t === 'p' && toks[i].v === v;
+  const eat = (v) => { if (!peek(v)) err('SyntaxError', "expected '" + v + "'"); i++; };
+  function expr() { let n = term(); while (peek('+') || peek('-')) { const op = toks[i++].v; n = { t: 'bin', op, a: n, b: term() }; } return n; }
+  function term() { let n = unary(); while (peek('*') || peek('/')) { const op = toks[i++].v; n = { t: 'bin', op, a: n, b: unary() }; } return n; }
+  function unary() { if (peek('-')) { i++; return { t: 'neg', e: unary() }; } return postfix(); }
+  function postfix() {
+    let n = primary();
+    for (;;) {
+      if (peek('.')) { i++; const id = toks[i++]; if (!id || id.t !== 'id') err('SyntaxError', 'expected attribute name'); n = { t: 'attr', o: n, name: id.v }; }
+      else if (peek('(')) { i++; const args = []; while (!peek(')')) { if (toks[i] && toks[i].t === 'id' && toks[i + 1] && toks[i + 1].t === 'p' && toks[i + 1].v === '=') { const k = toks[i].v; i += 2; args.push({ k, v: expr() }); } else args.push({ v: expr() }); if (!peek(')')) eat(','); } eat(')'); n = { t: 'call', f: n, args }; }
+      else return n;
+    }
+  }
+  function primary() {
+    const tk = toks[i++];
+    if (!tk) err('SyntaxError', 'unexpected end of input');
+    if (tk.t === 'num' || tk.t === 'str') return { t: 'lit', v: tk.v };
+    if (tk.t === 'id') return { t: 'name', id: tk.v };
+    if (tk.t === 'p' && tk.v === '(') { const e = expr(); eat(')'); return e; }
+    if (tk.t === 'p' && tk.v === '[') { const items = []; while (!peek(']')) { items.push(expr()); if (!peek(']')) eat(','); } eat(']'); return { t: 'list', items }; }
+    return err('SyntaxError', "unexpected '" + tk.v + "'");
+  }
+  let target = null;
+  if (toks[0] && toks[0].t === 'id' && toks[1] && toks[1].t === 'p' && toks[1].v === '=') { target = toks[0].v; i = 2; }
+  const e = expr();
+  if (i < toks.length) err('SyntaxError', "unexpected '" + toks[i].v + "'");
+  return { target, e };
+}
+function lookup(id) {
+  if (App.vars.has(id)) return App.vars.get(id);
+  if (id === 'True') return true;
+  if (id === 'False') return false;
+  if (id === 'None') return null;
+  if (id in BUILTINS) return BUILTINS[id];
+  return err('NameError', "name '" + id + "' is not defined");
+}
+function getAttr(o, name) {
+  if (o && o.kind === 'module') { if (name in o.members) return o.members[name]; err('AttributeError', "module 'godmod' has no attribute '" + name + "'"); }
+  if (o && o.kind === 'class') {
+    if (name in o.statics) return o.statics[name];
+    if (name in o.methods) err('TypeError', o.name + '.' + name + '() needs an instance: ' + o.name + '(...).' + name + '()');
+    err('AttributeError', "type object '" + o.name + "' has no attribute '" + name + "'");
+  }
+  if (o && o.kind === 'inst') {
+    const m = o.cls.methods[name];
+    if (m) return fn(o.cls.name + '.' + name, m.params, (...a) => m.f(o, ...a));
+    const g = o.cls.attrs[name];
+    if (g) return g(o);
+    err('AttributeError', "'" + o.cls.name + "' object has no attribute '" + name + "'");
+  }
+  return err('AttributeError', "'" + pyType(o) + "' object has no attribute '" + name + "'");
+}
+function pyType(v) { return v === null ? 'NoneType' : typeof v === 'number' ? (Number.isInteger(v) ? 'int' : 'float') : typeof v === 'string' ? 'str' : typeof v === 'boolean' ? 'bool' : Array.isArray(v) ? 'list' : v.kind === 'inst' ? v.cls.name : v.kind; }
+function call(f, pos, kw) {
+  const target = f && (f.kind === 'fn' || f.kind === 'class') ? f : null;
+  if (!target) err('TypeError', "'" + pyType(f) + "' object is not callable");
+  if (target.params[0] === '*') return target.f(...pos);
+  const args = new Array(target.params.length).fill(undefined);
+  if (pos.length > target.params.length) err('TypeError', target.name + '() takes ' + target.params.length + ' argument(s) but ' + pos.length + ' were given');
+  pos.forEach((v, k) => { args[k] = v; });
+  for (const [k, v] of Object.entries(kw)) {
+    const idx = target.params.indexOf(k);
+    if (idx < 0) err('TypeError', target.name + "() got an unexpected keyword argument '" + k + "'");
+    args[idx] = v;
+  }
+  return target.kind === 'class' ? target.make(...args) : target.f(...args);
+}
+function evaluate(n) {
+  switch (n.t) {
+    case 'lit': return n.v;
+    case 'name': return lookup(n.id);
+    case 'neg': { const v = evaluate(n.e); return typeof v === 'number' ? -v : err('TypeError', 'bad operand for unary -'); }
+    case 'bin': {
+      const a = evaluate(n.a), b = evaluate(n.b);
+      if (n.op === '+' && typeof a === 'string' && typeof b === 'string') return a + b;
+      if (typeof a !== 'number' || typeof b !== 'number') err('TypeError', "unsupported operand type(s) for " + n.op);
+      if (n.op === '/' && b === 0) err('ZeroDivisionError', 'division by zero. Even here.');
+      return n.op === '+' ? a + b : n.op === '-' ? a - b : n.op === '*' ? a * b : a / b;
+    }
+    case 'list': return n.items.map(evaluate);
+    case 'attr': return getAttr(evaluate(n.o), n.name);
+    case 'call': {
+      const f = evaluate(n.f), pos = [], kw = {};
+      for (const a of n.args) { if (a.k) kw[a.k] = evaluate(a.v); else pos.push(evaluate(a.v)); }
+      return call(f, pos, kw);
+    }
+  }
+  return null;
+}
+function repr(v) {
+  if (v === null || v === undefined) return 'None';
+  if (v === true) return 'True';
+  if (v === false) return 'False';
+  if (typeof v === 'number') return Number.isInteger(v) && Math.abs(v) < 1e16 ? String(v) : String(+v.toPrecision(12)).replace('e+', 'e+');
+  if (typeof v === 'string') return "'" + v.replace(/'/g, "\\'") + "'";
+  if (Array.isArray(v)) return '[' + v.map(repr).join(', ') + ']';
+  if (v.kind === 'inst') return v.cls.repr ? v.cls.repr(v) : '<' + v.cls.name + '>';
+  if (v.kind === 'class') return "<class 'godmod." + v.name + "'>";
+  if (v.kind === 'fn') return '<function ' + v.name + '>';
+  if (v.kind === 'module') return "<module 'godmod'>";
+  return String(v);
+}
+
+function sig(name, params) { return name + '(' + params.join(', ') + ')'; }
+function helpText(obj) {
+  if (obj && obj.kind === 'class') {
+    return 'class ' + sig(obj.name, obj.params) + '\n' + Object.entries(obj.methods).map(([k, m]) => '  .' + sig(k, m.params)).join('\n') +
+      (Object.keys(obj.attrs).length ? '\n  attributes: ' + Object.keys(obj.attrs).join(', ') : '');
+  }
+  if (obj && obj.kind === 'inst') return helpText(obj.cls);
+  return 'GodMod 2.0. Everything is under gm. (already imported).\n' +
+    Object.values(GM).map((c) => '  gm.' + sig(c.name, c.params)).join('\n') +
+    '\nhelp(gm.Universe) lists methods. Other: bodies(), universes(), print(), clear().';
+}
+function apiReference() {
+  return Object.values(GM).map((c) => '<b>gm.' + esc(sig(c.name, c.params)) + '</b>\n' + Object.entries(c.methods).map(([k, m]) => '    .' + esc(sig(k, m.params))).join('\n')).join('\n');
+}
+
+function print(text, kind) {
+  const div = document.createElement('div');
+  div.className = kind;
+  div.textContent = text;
+  termOut.appendChild(div);
+  while (termOut.children.length > 400) termOut.firstChild.remove();
+  termOut.scrollTop = termOut.scrollHeight;
+}
+say = (t) => print(t, 'ok');
+
+function runLine(line) {
+  const src = line.trim();
+  print(line, 'in');
+  if (!src) return;
+  if (App.history[App.history.length - 1] !== line) App.history.push(line);
+  App.histIdx = App.history.length;
+  try {
+    let m;
+    if ((m = src.match(/^import\s+godmod(?:\s+as\s+(\w+))?$/))) { App.vars.set(m[1] || 'godmod', MODULE); say('godmod 2.0 loaded (27 modules, 0 dependencies)' + (m[1] ? ' as ' + m[1] : '') + '.'); termOut.dataset.last = 'ok'; return; }
+    if (/^from\s+godmod\s+import\s+\*$/.test(src)) { for (const [k, v] of Object.entries(GM)) App.vars.set(k, v); say('All godmod classes imported into the session.'); termOut.dataset.last = 'ok'; return; }
+    const toks = tokenize(src);
+    if (!toks.length) return;
+    const { target, e } = parse(toks);
+    const v = evaluate(e);
+    if (target) App.vars.set(target, v);
+    else if (v !== null && v !== undefined) print(repr(v), 'val');
+    termOut.dataset.last = 'ok';
+  } catch (ex) {
+    if (ex instanceof PyError) print(ex.pyType + ': ' + ex.message, 'err');
+    else { print('InternalError: ' + ex.message, 'err'); console.error(ex); }
+    termOut.dataset.last = 'err';
+  }
+  App.inspSig = '';
+}
+
+function complete(input) {
+  const m = input.match(/([\w.]*)$/), frag = m ? m[1] : '';
+  const dot = frag.lastIndexOf('.');
+  let pool = [], base = '', part = frag;
+  if (dot >= 0) {
+    base = frag.slice(0, dot + 1); part = frag.slice(dot + 1);
+    try {
+      const obj = evaluate(parse(tokenize(frag.slice(0, dot))).e);
+      if (obj && obj.kind === 'module') pool = Object.keys(GM);
+      else if (obj && obj.kind === 'inst') pool = [...Object.keys(obj.cls.methods).map((k) => k + '('), ...Object.keys(obj.cls.attrs)];
+      else if (obj && obj.kind === 'class') pool = Object.keys(obj.statics).map((k) => k + '(');
+    } catch (e) { pool = []; }
+  } else pool = [...App.vars.keys(), ...Object.keys(BUILTINS).map((k) => k + '(')];
+  const hits = pool.filter((p) => p.startsWith(part));
+  if (hits.length === 1) return input.slice(0, input.length - frag.length) + base + hits[0];
+  if (hits.length > 1) {
+    print(hits.join('   '), 'sys');
+    let common = hits[0];
+    for (const h of hits) while (!h.startsWith(common)) common = common.slice(0, -1);
+    return input.slice(0, input.length - frag.length) + base + common;
+  }
+  return input;
+}
+
+async function runStory() {
+  if (App.storyRunning) return;
+  App.storyRunning = true;
+  btn.story.disabled = true;
+  print('# Transcript recovered from the holographic display, line by line.', 'sys');
+  for (const line of STORY) {
+    if (REDUCED) termIn.value = line;
+    else for (let k = 1; k <= line.length; k++) { termIn.value = line.slice(0, k); await wait(14); }
+    await wait(180);
+    termIn.value = '';
+    runLine(line);
+    await wait(420);
+  }
+  App.storyRunning = false;
+  btn.story.disabled = false;
+}
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// ─── Camera ───
+function fitZoom() { return Math.min(App.W, App.H) / (2 * FIT_RADIUS); }
+function fitView() {
+  const h = dominant(U());
+  App.cam.target = { x: h ? h.x : 0, y: h ? h.y : 0, zoom: fitZoom() };
+}
+function toScreen(x, y) { return [(x - App.cam.x) * App.cam.zoom + App.W / 2, (y - App.cam.y) * App.cam.zoom + App.H / 2]; }
+function toWorld(sx, sy) { return [(sx - App.W / 2) / App.cam.zoom + App.cam.x, (sy - App.H / 2) / App.cam.zoom + App.cam.y]; }
+function zoomAt(sx, sy, k) {
+  const [wx, wy] = toWorld(sx, sy);
+  App.cam.zoom = clamp(App.cam.zoom * k, 0.03, 30);
+  App.cam.target = null;
+  const [nx, ny] = toWorld(sx, sy);
+  App.cam.x += wx - nx; App.cam.y += wy - ny;
+}
+function hitBody(sx, sy) {
+  const u = U(); let best = null, bd = Infinity;
+  for (const b of u.bodies) {
+    const [x, y] = toScreen(b.x, b.y), d = Math.hypot(x - sx, y - sy), lim = Math.max(b.r * App.cam.zoom, 7) + 5;
+    if (d < lim && d < bd) { bd = d; best = b; }
+  }
+  return best;
+}
+
+// ─── Render: canvas ───
+function resize() {
+  const r = viewportEl.getBoundingClientRect();
+  App.dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const firstFit = !App.W;
+  App.W = Math.max(1, r.width); App.H = Math.max(1, r.height);
+  canvas.width = Math.round(App.W * App.dpr); canvas.height = Math.round(App.H * App.dpr);
+  ctx.setTransform(App.dpr, 0, 0, App.dpr, 0, 0);
+  if (firstFit) { fitView(); App.cam.zoom = App.cam.target.zoom; App.cam.x = App.cam.target.x; App.cam.y = App.cam.target.y; }
+}
+function makeBgStars() {
+  App.bgStars = Array.from({ length: 420 }, () => ({ x: Math.random(), y: Math.random(), p: 0.02 + Math.random() * 0.08, r: Math.random() < 0.08 ? 1.4 : 0.8, a: 0.25 + Math.random() * 0.6, s: Math.random() * 6 }));
+}
+
+function draw(now) {
+  const u = U(), C = App.colors, z = App.cam.zoom, W = App.W, H = App.H;
+  ctx.fillStyle = C.space; ctx.fillRect(0, 0, W, H);
+
+  // background stars with slight parallax
+  ctx.fillStyle = C.bgStar;
+  for (const s of App.bgStars) {
+    let x = (s.x * W - App.cam.x * s.p * z) % W; if (x < 0) x += W;
+    let y = (s.y * H - App.cam.y * s.p * z) % H; if (y < 0) y += H;
+    ctx.globalAlpha = s.a * (REDUCED ? 1 : 0.7 + 0.3 * Math.sin(now * 0.001 + s.s)) * (u.dead ? 0.3 : 1);
+    ctx.fillRect(x, y, s.r, s.r);
+  }
+  ctx.globalAlpha = 1;
+
+  // HUD grid: AU rings around the dominant mass
+  const host = dominant(u);
+  if (host) {
+    const [hx, hy] = toScreen(host.x, host.y);
+    ctx.strokeStyle = C.grid; ctx.lineWidth = 1; ctx.setLineDash([2, 6]);
+    ctx.font = '10px "IBM Plex Mono", monospace'; ctx.fillStyle = C.label;
+    for (const a of [0.5, 1, 2, 3, 5, 8]) {
+      const rr = a * L0 * z; if (rr < 30 || rr > Math.max(W, H) * 1.5) continue;
+      ctx.beginPath(); ctx.arc(hx, hy, rr, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = 0.6; ctx.fillText(a + ' AU', hx + rr * 0.707 + 4, hy - rr * 0.707); ctx.globalAlpha = 1;
+    }
+    ctx.setLineDash([]);
+  }
+
+  // nebulae
+  for (const neb of u.nebulae) {
+    const p = neb.p, cols = C.nebula;
+    for (let i = 0; i < neb.n; i++) {
+      const j = i * 5, [x, y] = toScreen(p[j], p[j + 1]);
+      if (x < -4 || y < -4 || x > W + 4 || y > H + 4) continue;
+      const tw = REDUCED ? 0.8 : 0.55 + 0.45 * Math.sin(now * 0.002 + p[j + 4] * 40);
+      ctx.globalAlpha = tw * (neb.text ? 1 : 0.5);
+      ctx.fillStyle = cols[i % 3];
+      const s = Math.max(1.5, 2.2 * Math.min(z, 2));
+      ctx.fillRect(x, y, s, s);
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // wormholes
+  for (const w of u.wormholes) {
+    const A = mouthPos(u, w.a), B = mouthPos(u, w.b);
+    const [ax, ay] = toScreen(A.x, A.y), [bx, by] = toScreen(B.x, B.y);
+    ctx.strokeStyle = C.worm; ctx.globalAlpha = 0.25; ctx.setLineDash([3, 7]);
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]);
+    for (const [x, y] of [[ax, ay], [bx, by]]) {
+      for (let k = 0; k < 3; k++) {
+        ctx.globalAlpha = 0.9 - k * 0.25;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(x, y, Math.max(4, w.r * z) * (1 - k * 0.22 + (REDUCED ? 0 : 0.06 * Math.sin(now * 0.004 + k))), 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1; ctx.lineWidth = 1;
+  }
+
+  // trails
+  for (const b of u.bodies) {
+    if (b.trail.length < 2 || b.type === 'debris') continue;
+    ctx.strokeStyle = b.type === 'star' ? C.star : b.color;
+    ctx.lineWidth = 1;
+    for (let i = 1; i < b.trail.length; i++) {
+      const [x0, y0] = toScreen(b.trail[i - 1][0], b.trail[i - 1][1]), [x1, y1] = toScreen(b.trail[i][0], b.trail[i][1]);
+      ctx.globalAlpha = (i / b.trail.length) * 0.45;
+      ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // bodies
+  const c = C0 * u.laws.c;
+  for (const b of u.bodies) drawBody(u, b, c, now);
+
+  // labels
+  ctx.font = '10.5px "IBM Plex Mono", monospace'; ctx.textAlign = 'left';
+  for (const b of u.bodies) {
+    if (b.type === 'debris' || (b.type === 'moon' && z < 1.2)) continue;
+    const [x, y] = toScreen(b.x, b.y), rr = Math.max(b.r * z, 2);
+    if (x < -50 || x > W + 50 || y < -20 || y > H + 20) continue;
+    ctx.fillStyle = b.id === App.selectedId ? C.select : C.label;
+    ctx.globalAlpha = b.id === App.hoverId || b.id === App.selectedId ? 1 : 0.7;
+    ctx.fillText(b.name + (b.life ? ' ·' : ''), x + rr + 5, y - rr - 3);
+    if (b.life) { ctx.fillStyle = C.life; ctx.fillText(b.life.species, x + rr + 5, y - rr + 9); }
+  }
+  ctx.globalAlpha = 1;
+
+  // selection brackets and velocity vector
+  const sel = bodyById(u, App.selectedId);
+  if (sel) {
+    const [x, y] = toScreen(sel.x, sel.y), s = Math.max(sel.r * z, 5) + 8, k = 6;
+    ctx.strokeStyle = C.select; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      ctx.moveTo(x + sx * s, y + sy * (s - k)); ctx.lineTo(x + sx * s, y + sy * s); ctx.lineTo(x + sx * (s - k), y + sy * s);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 0.7; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + sel.vx * z * 0.6, y + sel.vy * z * 0.6); ctx.stroke();
+    ctx.setLineDash([]); ctx.globalAlpha = 1; ctx.lineWidth = 1;
+  }
+
+  // pending wormhole mouth
+  if (App.pendingMouth) {
+    const m = mouthPos(u, App.pendingMouth), [x, y] = toScreen(m.x, m.y);
+    ctx.strokeStyle = C.worm; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI * 2); ctx.stroke();
+    if (App.mouse.inside) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(App.mouse.sx, App.mouse.sy); ctx.stroke(); }
+    ctx.setLineDash([]);
+  }
+
+  // spawn drag preview with predicted path
+  const P = App.pointer;
+  if (P && P.mode === 'spawn' && P.moved) {
+    const [sx, sy] = toScreen(P.wx0, P.wy0);
+    ctx.strokeStyle = C.select; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(App.mouse.sx, App.mouse.sy); ctx.stroke();
+    ctx.lineWidth = 1; ctx.setLineDash([2, 4]); ctx.globalAlpha = 0.8;
+    const path = predict(u, P.wx0, P.wy0, (App.mouse.wx - P.wx0) * 1.4, (App.mouse.wy - P.wy0) * 1.4);
+    ctx.beginPath();
+    path.forEach(([px, py], k) => { const [qx, qy] = toScreen(px, py); if (k) ctx.lineTo(qx, qy); else ctx.moveTo(qx, qy); });
+    ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  }
+
+  // flashes
+  App.flashes = App.flashes.filter((f) => now - f.t0 < f.dur || f.t0 > now);
+  for (const f of App.flashes) {
+    const t = clamp((now - f.t0) / f.dur, 0, 1), [x, y] = toScreen(f.x, f.y);
+    if (f.kind === 'beam') {
+      ctx.strokeStyle = C.beam; ctx.globalAlpha = (1 - t) * 0.9; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(f.ang) * 4000, y + Math.sin(f.ang) * 4000);
+      ctx.moveTo(x, y); ctx.lineTo(x - Math.cos(f.ang) * 4000, y - Math.sin(f.ang) * 4000); ctx.stroke();
+      ctx.lineWidth = 1;
+    } else {
+      ctx.strokeStyle = f.kind === 'bang' ? C.star : C.blast;
+      ctx.globalAlpha = 1 - t; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(x, y, f.r * z * (REDUCED ? 1 : t), 0, Math.PI * 2); ctx.stroke(); ctx.lineWidth = 1;
+      if (t < 0.25) { ctx.fillStyle = C.blast; ctx.globalAlpha = (0.25 - t) * 2; ctx.beginPath(); ctx.arc(x, y, 30 * Math.max(z, 0.4), 0, Math.PI * 2); ctx.fill(); }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  if (u.dead || u.dying) { ctx.fillStyle = C.space; ctx.globalAlpha = u.dead ? 0.55 : (1 - u.heat) * 0.5; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
+}
+
+function drawBody(u, b, c, now) {
+  const C = App.colors, z = App.cam.zoom, [x, y] = toScreen(b.x, b.y), rr = Math.max(b.r * z, b.type === 'debris' ? 0.8 : 1.6);
+  if (x < -rr * 6 - 40 || x > App.W + rr * 6 + 40 || y < -rr * 6 - 40 || y > App.H + rr * 6 + 40) return;
+  const v = Math.hypot(b.vx, b.vy), beta = Math.min(0.98, v / c);
+  ctx.save();
+  ctx.translate(x, y);
+  if (beta > 0.15) { ctx.rotate(Math.atan2(b.vy, b.vx)); ctx.scale(Math.sqrt(1 - beta * beta), 1); }
+  if (b.type === 'star') {
+    const L = Math.min(4, luminosity(u, b) ** 0.25);
+    const g = ctx.createRadialGradient(0, 0, rr * 0.3, 0, 0, rr * (3 + L * 1.5));
+    g.addColorStop(0, C.star); g.addColorStop(1, 'transparent');
+    ctx.globalAlpha = 0.5 * u.heat; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, rr * (3 + L * 1.5), 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = Math.max(0.25, u.heat); ctx.fillStyle = C.starCore; ctx.beginPath(); ctx.arc(0, 0, rr, 0, Math.PI * 2); ctx.fill();
+  } else if (b.type === 'blackhole') {
+    ctx.strokeStyle = C.disk; ctx.globalAlpha = 0.8; ctx.lineWidth = Math.max(1.5, rr * 0.35);
+    ctx.beginPath(); ctx.ellipse(0, 0, rr * 2.4, rr * 0.8, -0.35, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = C.disk2; ctx.lineWidth = 1; ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.arc(0, 0, rr * 1.15, 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = 1; ctx.fillStyle = C.space; ctx.beginPath(); ctx.arc(0, 0, rr, 0, Math.PI * 2); ctx.fill();
+  } else if (b.type === 'neutron') {
+    const pulse = REDUCED ? 1 : 0.6 + 0.4 * Math.abs(Math.sin(now * 0.012));
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rr * 6);
+    g.addColorStop(0, C.neutron); g.addColorStop(1, 'transparent');
+    ctx.globalAlpha = pulse; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, rr * 6, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1; ctx.fillStyle = C.neutron; ctx.beginPath(); ctx.arc(0, 0, rr, 0, Math.PI * 2); ctx.fill();
+  } else {
+    ctx.fillStyle = b.color; ctx.globalAlpha = b.type === 'debris' ? 0.8 : 1;
+    ctx.beginPath(); ctx.arc(0, 0, rr, 0, Math.PI * 2); ctx.fill();
+    // night side, facing away from the brightest star
+    const s = dominant(u);
+    if (s && s !== b && rr > 2.5) {
+      const ang = Math.atan2(s.y - b.y, s.x - b.x);
+      const g = ctx.createLinearGradient(Math.cos(ang) * rr, Math.sin(ang) * rr, -Math.cos(ang) * rr, -Math.sin(ang) * rr);
+      g.addColorStop(0.35, 'transparent'); g.addColorStop(1, C.space);
+      ctx.globalAlpha = 0.75; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, rr, 0, Math.PI * 2); ctx.fill();
+    }
+    if (b.life) {
+      ctx.globalAlpha = 0.9; ctx.strokeStyle = C.life; ctx.lineWidth = 1.2;
+      if (b.life.iq < 6) ctx.setLineDash([2, 3]);
+      ctx.beginPath(); ctx.arc(0, 0, rr + 3, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+      if (b.life.iq >= 9) {
+        const n = Math.min(6, Math.floor(b.life.iq - 7));
+        for (let k = 0; k < n; k++) { const a = now * 0.0015 * (REDUCED ? 0 : 1) + k * 2.1; ctx.fillStyle = C.life; ctx.fillRect(Math.cos(a) * (rr + 7) - 1, Math.sin(a) * (rr + 7) - 1, 2, 2); }
+      }
+    }
+    if (b.weather && rr > 3) {
+      ctx.globalAlpha = 0.5; ctx.strokeStyle = b.weather.mode === 'sun' ? C.star : C.label; ctx.setLineDash([1, 2]);
+      ctx.beginPath(); ctx.arc(0, 0, rr + 1, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    }
+  }
+  ctx.restore();
+  ctx.globalAlpha = 1; ctx.lineWidth = 1;
+}
+
+function predict(u, x, y, vx, vy) {
+  const pts = [[x, y]], G = gs(u), d = u.laws.dims, h = 1 / 40;
+  for (let i = 0; i < 360; i++) {
+    let ax = 0, ay = 0;
+    for (const b of u.bodies) {
+      if (b.type === 'debris') continue;
+      const dx = b.x - x, dy = b.y - y, r2 = dx * dx + dy * dy + EPS * EPS, r = Math.sqrt(r2);
+      if (r < b.r) return pts;
+      const f = d === 3 ? G / (r2 * r) : G * Math.pow(L0 / r, d - 1) / (L0 * L0 * r);
+      ax += f * b.m * dx; ay += f * b.m * dy;
+    }
+    vx += ax * h; vy += ay * h; x += vx * h; y += vy * h;
+    if (i % 3 === 0) pts.push([x, y]);
+  }
+  return pts;
+}
+
+// ─── Render: panels ───
+function renderLaws() {
+  lawsEl.innerHTML = LAWS.map((l) => `
+    <div class="law" data-law="${l.key}">
+      <div class="top"><label class="name" for="law-${l.key}">${l.name}</label><span class="val" data-val></span></div>
+      <input type="range" id="law-${l.key}" data-const="${l.key}" min="${l.log ? 0 : l.min}" max="${l.log ? 1000 : l.max}" step="${l.log ? 1 : l.step}">
+      <div class="note" data-note></div>
+    </div>`).join('') + '<button class="btn reset-laws" id="resetLaws" title="Restore factory constants">Restore factory constants</button>';
+  syncLaws();
+}
+function lawToSlider(l, v) { return l.log ? Math.round(Math.log(v / l.min) / Math.log(l.max / l.min) * 1000) : v; }
+function sliderToLaw(l, s) { return l.log ? l.min * Math.pow(l.max / l.min, s / 1000) : l.int ? Math.round(s) : +s; }
+function lawText(l, v) {
+  if (l.real) return sci(v * l.real) + ' ' + mult(v);
+  if (l.pct) return Math.round(v * 100) + '%';
+  return String(v);
+}
+function lawNote(u, l) {
+  const v = u.laws[l.key];
+  switch (l.key) {
+    case 'G': return Math.abs(Math.log10(v)) < 0.01 ? 'Factory value' : 'Stars shine ' + mult(v ** 4) + ' (L ∝ G⁴)';
+    case 'c': return v < 0.3 ? 'Planets near light speed: contraction visible' : v < 0.99 || v > 1.01 ? 'E = mc² now ' + mult(v * v) : 'Factory value';
+    case 'h': return v > 60 ? 'Chemistry has stopped working' : v > 3 ? 'Visible quantum jitter' : v < 0.05 ? 'Atoms too small to be stable' : 'Factory value';
+    case 'dm': return 'Halo pull toward the centre of mass';
+    case 'de': return v > 0.6 ? 'Expansion is pulling systems apart' : 'Expansion outward from the centre';
+    case 'dims': return v === 3 ? 'Stable orbits, stable atoms' : v > 3 ? 'Gravity ∝ 1/r' + String(v - 1).split('').map((c) => SUP[c]).join('') + ': no stable orbits' : 'Gravity ∝ 1/r: no stable atoms';
+  }
+  return '';
+}
+function syncLaws() {
+  const u = U(); if (!u) return;
+  for (const l of LAWS) {
+    const row = lawsEl.querySelector('[data-law="' + l.key + '"]'); if (!row) continue;
+    const input = row.querySelector('input'), v = u.laws[l.key];
+    if (document.activeElement !== input) input.value = lawToSlider(l, v);
+    const val = row.querySelector('[data-val]');
+    val.textContent = lawText(l, v);
+    val.classList.toggle('off', Math.abs(v - l.def) > (l.log ? l.def * 0.02 : 0.001));
+    row.querySelector('[data-note]').textContent = lawNote(u, l);
+    row.dataset.value = String(v);
+  }
+}
+function renderTools() {
+  toolsEl.innerHTML = TOOLS.map((t) => `<button class="tool" data-tool="${t.id}" aria-pressed="${t.id === App.tool}" title="${t.name} (${t.key})">
+    <svg viewBox="0 0 24 24" aria-hidden="true">${ICON[t.id]}</svg><span>${t.name}</span><kbd>${t.key}</kbd></button>`).join('');
+}
+function setTool(id) {
+  App.tool = id; App.pendingMouth = null;
+  toolsEl.querySelectorAll('.tool').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tool === id)));
+  const t = TOOLS.find((x) => x.id === id);
+  hudTool.innerHTML = '<b>' + esc(t.name) + '</b><br>' + esc(t.hint);
+  canvas.style.cursor = id === 'select' ? 'default' : 'crosshair';
+  appEl.dataset.tool = id;
+}
+function renderUnis() {
+  const sig = App.multiverse.map((u) => u.uid + u.name).join('|') + '#' + App.active;
+  if (sig === App.unisSig) return;
+  App.unisSig = sig;
+  unisEl.innerHTML = App.multiverse.map((u, i) => `<button data-uni="${i}" aria-current="${i === App.active}" title="Switch to ${esc(u.name)}">${esc(u.name)}</button>`).join('') +
+    '<button class="add" data-uni="new" title="Create a universe">+ Universe</button>';
+}
+function switchUniverse(i) {
+  if (i < 0 || i >= App.multiverse.length) return;
+  App.active = i; App.selectedId = null; App.followId = null; App.pendingMouth = null; App.inspSig = '';
+  renderUnis(); syncLaws(); fitView();
+}
+
+function inspectorSig(u, b) {
+  if (!b) return 'u' + u.uid + ':' + u.bodies.filter((x) => x.type !== 'debris').map((x) => x.id + (x.life ? 'L' : '')).join(',');
+  return 'b' + b.id + b.type + (b.life ? 'L' + b.life.species + b.life.eco.length : '') + (b.pinned ? 'P' : '') + (App.followId === b.id ? 'F' : '');
+}
+function renderInspector(force) {
+  const u = U(), b = bodyById(u, App.selectedId);
+  const sig = inspectorSig(u, b);
+  if (force || sig !== App.inspSig) {
+    App.inspSig = sig;
+    inspTitle.textContent = b ? 'Inspector' : 'Universe';
+    inspEl.innerHTML = b ? bodyPanel(u, b) : universePanel(u);
+  }
+  updateInspectorValues(u, b);
+}
+function universePanel(u) {
+  const list = u.bodies.filter((b) => b.type !== 'debris').sort((a, b) => ['star', 'blackhole', 'neutron', 'planet', 'moon'].indexOf(a.type) - ['star', 'blackhole', 'neutron', 'planet', 'moon'].indexOf(b.type));
+  const debris = u.bodies.length - list.length;
+  return `<h3>${esc(u.name)}</h3><div class="kind">Universe · ${App.multiverse.length} in multiverse</div>
+    <dl class="kv"><dt>Bodies</dt><dd data-f="u-bodies"></dd><dt>Biospheres</dt><dd data-f="u-life"></dd><dt>Snapshots</dt><dd data-f="u-snaps"></dd><dt>Escaped</dt><dd data-f="u-esc"></dd><dt>Stability</dt><dd data-f="u-stab"></dd></dl>
+    <span class="label">Bodies</span>
+    <ul class="blist">${list.map((b) => `<li><button data-pick="${b.id}"><span class="dot" style="background:${b.type === 'star' ? App.colors.star : b.type === 'blackhole' ? App.colors.disk : b.color}"></span>${esc(b.name)}${b.life ? ' <span class="lf">' + esc(b.life.species) + '</span>' : ''}<span class="t">${b.type}</span></button></li>`).join('')}</ul>
+    ${debris ? `<p class="hint">${debris} fragment(s) not listed.</p>` : ''}
+    <p class="hint">Click a body in the viewport to inspect it. Press <b>?</b> for the manual.</p>`;
+}
+function bodyPanel(u, b) {
+  const isRock = b.type === 'planet' || b.type === 'moon';
+  let h = `<h3>${esc(b.name)}</h3><div class="kind">${b.type === 'blackhole' ? 'black hole' : b.type === 'neutron' ? 'neutron star' : b.type} · id ${b.id}</div>
+    <dl class="kv"><dt>Mass</dt><dd data-f="m"></dd><dt>Radius</dt><dd data-f="r"></dd><dt>Speed</dt><dd data-f="v"></dd><dt>β = v/c</dt><dd data-f="beta"></dd>
+    <dt>Distance</dt><dd data-f="dist"></dd>${b.type === 'star' ? '<dt>Luminosity</dt><dd data-f="lum"></dd>' : '<dt>Surface</dt><dd data-f="temp"></dd>'}
+    ${isRock ? '<dt>Habitability</dt><dd data-f="hab"></dd><dt>Weather</dt><dd data-f="wx"></dd>' : ''}</dl>
+    <div class="acts-row">
+      <button class="btn${App.followId === b.id ? ' on' : ''}" data-act="follow">${App.followId === b.id ? 'Following' : 'Follow'}</button>
+      <button class="btn${b.pinned ? ' on' : ''}" data-act="pin">${b.pinned ? 'Pinned' : 'Pin'}</button>
+      <button class="btn" data-act="heavier" title="Double the mass">Mass ×2</button>
+      <button class="btn" data-act="lighter" title="Halve the mass">Mass ÷2</button>
+      <button class="btn danger" data-act="unmake" title="Remove from the universe (Delete)">Unmake</button>
+    </div>`;
+  if (b.type === 'star') h += `<div class="sect"><span class="label">Stellar controls</span><div class="acts-row"><button class="btn danger" data-act="nova">Trigger supernova</button><button class="btn warn" data-act="grb">Gamma-ray burst</button></div></div>`;
+  if (isRock) {
+    h += `<div class="sect"><span class="label">Weather</span><div class="acts-row"><button class="btn" data-act="rain">Rain</button><button class="btn" data-act="sun">Sun</button><button class="btn warn" data-act="storm">Storm</button></div></div>`;
+    if (b.life) {
+      h += `<div class="sect"><span class="label">Biosphere</span>
+        <dl class="kv"><dt>Species</dt><dd class="good">${esc(b.life.species)}</dd><dt>Population</dt><dd data-f="pop"></dd><dt>Stage</dt><dd data-f="stage"></dd><dt>Intelligence</dt><dd data-f="iq"></dd></dl>
+        <div class="meter" aria-hidden="true"><i data-f="iqbar"></i></div>
+        <dl class="kv"><dt>Ecosystem</dt><dd>${esc(b.life.eco.join(', '))}</dd></dl>
+        <div class="acts-row"><button class="btn" data-act="evolve">Evolve +1M yr</button><button class="btn" data-act="uplift">Uplift +1</button><button class="btn danger" data-act="extinct">Extinction</button></div></div>`;
+    } else {
+      h += `<div class="sect"><span class="label">Biosphere</span><p class="hint" style="margin:0 0 8px">Lifeless.</p>
+        <form class="seed" data-act="seed"><input name="sp" aria-label="Species name" placeholder="${esc(speciesName())}"><button class="btn">Seed life</button></form></div>`;
+    }
+  }
+  h += `<div class="sect"><span class="label">Terminal handle</span><button class="btn" data-act="handle">${esc(varName(b.name))} = gm.CelestialBody(…)</button></div>`;
+  return h;
+}
+function varName(n) { return n.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^(\d)/, '_$1') || 'body'; }
+function updateInspectorValues(u, b) {
+  const set = (k, v, cls) => { const el = inspEl.querySelector('[data-f="' + k + '"]'); if (el) { el.textContent = v; if (cls !== undefined) el.className = cls; } };
+  if (!b) {
+    set('u-bodies', String(u.bodies.length)); set('u-life', String(u.bodies.filter((x) => x.life).length));
+    set('u-snaps', u.snaps.length + ' (' + (u.snaps.length * SNAP_EVERY).toFixed(0) + ' Myr)'); set('u-esc', String(u.escaped));
+    const s = stability(u); set('u-stab', s + '%', s > 70 ? 'good' : s > 35 ? 'warn' : 'crit');
+    return;
+  }
+  const host = dominant(u), c = C0 * u.laws.c, v = Math.hypot(b.vx, b.vy);
+  set('m', (b.m < 0.1 ? b.m.toFixed(3) : b.m.toFixed(b.m < 10 ? 2 : 0)) + (b.type === 'star' ? ' (' + (b.m / MSUN).toFixed(2) + ' M☉)' : ''));
+  set('r', b.r.toFixed(1) + ' u'); set('v', v.toFixed(1) + ' u/s');
+  set('beta', (v / c).toFixed(3), v / c > 0.3 ? 'warn' : '');
+  set('dist', host && host !== b ? au(Math.hypot(b.x - host.x, b.y - host.y)) + ' from ' + host.name : 'centre');
+  set('lum', mult(luminosity(u, b)) + ' L☉');
+  set('temp', b.temp.toFixed(0) + ' K', b.temp > 360 || b.temp < 220 ? 'crit' : b.temp > 325 || b.temp < 255 ? 'warn' : 'good');
+  if (b.type === 'planet' || b.type === 'moon') {
+    const hab = habitability(u, b);
+    set('hab', Math.round(hab.h * 100) + '%' + (hab.why ? ' · ' + hab.why : ''), hab.h > 0.7 ? 'good' : hab.h > 0.2 ? 'warn' : 'crit');
+    set('wx', b.weather ? b.weather.mode + ' · ' + b.weather.left.toFixed(1) + ' Myr' : 'nominal');
+  }
+  if (b.life) {
+    set('pop', big(b.life.pop)); set('stage', stageOf(b.life.iq)); set('iq', b.life.iq.toFixed(2) + ' / 10');
+    const bar = inspEl.querySelector('[data-f="iqbar"]'); if (bar) bar.style.width = b.life.iq * 10 + '%';
+  }
+}
+
+function renderReadouts() {
+  const u = U(), s = stability(u);
+  ro.time.textContent = (START_GYR + myr(u) / 1000).toFixed(6) + ' Gyr';
+  ro.rate.textContent = App.paused ? 'paused' : '×' + RATES[App.rateIdx];
+  ro.rate.className = App.paused ? 'warn' : '';
+  ro.bodies.textContent = String(u.bodies.length);
+  const lifeN = u.bodies.filter((b) => b.life).length;
+  ro.life.textContent = String(lifeN);
+  ro.stab.textContent = s + '%';
+  ro.stab.className = s > 70 ? '' : s > 35 ? 'warn' : 'crit';
+  btn.pause.textContent = App.paused ? 'Resume' : 'Pause';
+  btn.pause.classList.toggle('on', App.paused);
+  const z = App.cam.zoom;
+  hudScale.textContent = '1 AU = ' + (L0 * z).toFixed(0) + ' px · zoom ' + z.toFixed(2) + (App.followId ? ' · following ' + (bodyById(u, App.followId) || {}).name : '');
+  hudCursor.textContent = App.mouse.inside ? 'x ' + (App.mouse.wx / L0).toFixed(2) + ' AU · y ' + (App.mouse.wy / L0).toFixed(2) + ' AU' : '';
+  Object.assign(appEl.dataset, {
+    state: App.state, paused: String(App.paused), rate: String(curRate()), universe: u.name, universes: String(App.multiverse.length),
+    bodies: String(u.bodies.length), life: String(lifeN), myr: myr(u).toFixed(3), stability: String(s), selected: App.selectedId == null ? '' : String(App.selectedId),
+    dims: String(u.laws.dims), dead: String(u.dead),
+  });
+}
+
+// ─── Actions (UI) ───
+function spawnAt(type, wx, wy, vx, vy) {
+  const u = U();
+  const b = makeBody({ type, x: wx, y: wy });
+  if (vx == null) {
+    const host = attractorAt(u, wx, wy);
+    if (host) { const d = Math.hypot(wx - host.x, wy - host.y); if (d > host.r + b.r + 2) setOrbit(u, b, host, d, Math.atan2(wy - host.y, wx - host.x)); }
+  } else { b.vx = vx; b.vy = vy; }
+  if (!addBody(u, b)) return;
+  App.selectedId = b.id;
+  log((type === 'blackhole' ? 'Black hole ' : type === 'star' ? 'Star ' : 'Planet ') + b.name + ' created.', type === 'blackhole' ? 'warn' : 'info');
+}
+function bodyAction(act, form) {
+  const u = U(), b = bodyById(u, App.selectedId);
+  if (!b) return;
+  switch (act) {
+    case 'follow': App.followId = App.followId === b.id ? null : b.id; break;
+    case 'pin': b.pinned = !b.pinned; if (b.pinned) { b.vx = 0; b.vy = 0; } break;
+    case 'heavier': b.m *= 2; b.r *= Math.cbrt(2); log(b.name + ' mass doubled.'); break;
+    case 'lighter': b.m /= 2; b.r /= Math.cbrt(2); log(b.name + ' mass halved.'); break;
+    case 'unmake': unmake(u, b); break;
+    case 'nova': supernova(u, b); break;
+    case 'grb': gammaBurst(u, b.x, b.y, 20); break;
+    case 'rain': b.weather = { mode: 'rain', left: 3, intensity: 0 }; log('Rain on ' + b.name + '.'); break;
+    case 'sun': b.weather = { mode: 'sun', left: 3, intensity: 0 }; log('Clear skies on ' + b.name + '.'); break;
+    case 'storm': b.weather = { mode: 'storm', left: 3, intensity: 6 }; log('Storm on ' + b.name + '.', 'warn'); break;
+    case 'evolve': if (b.life) { b.life.iq = Math.min(10, b.life.iq + 0.09 * b.life.genes.intelligence); } break;
+    case 'uplift': if (b.life) { b.life.iq = Math.min(10, Math.floor(b.life.iq) + 1); const st = stageIndex(b.life.iq); if (st > b.life.stage) { b.life.stage = st; log(b.life.species + ' on ' + b.name + ': ' + lc(STAGES[st][1]) + '.', 'life'); } } break;
+    case 'extinct': if (b.life) { log(b.life.species + ' on ' + b.name + ': extinct (by operator).', 'crit'); b.life = null; } break;
+    case 'seed': { const name = (form && form.sp.value.trim()) || (form && form.sp.placeholder) || speciesName(); seedLife(b, name, 1e6, 0); log('Life seeded on ' + b.name + ': ' + name + '.', 'life'); break; }
+    case 'handle': {
+      const vn = varName(b.name);
+      if (b.life) App.vars.set(varName(b.life.species), inst(GM.LifeForm, { planet: handleBody(u, b), species: b.life.species, name: b.life.species }));
+      App.vars.set(vn, handleBody(u, b));
+      print('# ' + vn + ' = gm.CelestialBody(name=' + repr(b.name) + ')' + (b.life ? '; ' + varName(b.life.species) + ' = gm.LifeForm(...)' : ''), 'sys');
+      termIn.value = vn + '.'; termIn.focus(); break;
+    }
+  }
+  App.inspSig = '';
+}
+function unmake(u, b) {
+  b.dead = true; u.bodies = u.bodies.filter((x) => !x.dead);
+  u.wormholes.forEach((w) => { mouthPos(u, w.a); mouthPos(u, w.b); });
+  log(b.name + ' unmade.', b.life ? 'crit' : 'warn');
+  App.selectedId = null; if (App.followId === b.id) App.followId = null;
+}
+function changeRate(dir) {
+  if (App.paused && dir > 0) { App.paused = false; return; }
+  App.rateIdx = clamp(App.rateIdx + dir, 1, RATES.length - 1);
+}
+
+// ─── Main loop ───
+let lastFrame = 0;
+function frame(now) {
+  const dtReal = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0;
+  lastFrame = now;
+  const u = U();
+  if (App.state === 'running') {
+    const r = curRate();
+    if (r > 0 && !u.dead) {
+      advance(u, dtReal * r, dtReal);
+      for (const b of u.bodies) {
+        if (b.type === 'debris') continue;
+        const t = b.trail, last = t[t.length - 1];
+        if (!last || Math.abs(last[0] - b.x) + Math.abs(last[1] - b.y) > 1.5 / App.cam.zoom) { t.push([b.x, b.y]); if (t.length > TRAIL_LEN) t.shift(); }
+      }
+    } else {
+      for (const b of u.bodies) b.temp = temperature(u, b);
+    }
+  }
+  nebulaStep(u, dtReal);
+  const f = bodyById(u, App.followId);
+  if (f) { App.cam.x = f.x; App.cam.y = f.y; App.cam.target = null; }
+  else if (App.cam.target) {
+    const T = App.cam.target, k = REDUCED ? 1 : Math.min(1, dtReal * 3.5);
+    App.cam.x = lerp(App.cam.x, T.x, k); App.cam.y = lerp(App.cam.y, T.y, k); App.cam.zoom = lerp(App.cam.zoom, T.zoom, k);
+    if (Math.abs(App.cam.x - T.x) < 0.5 && Math.abs(App.cam.zoom - T.zoom) < 0.001) App.cam.target = null;
+  }
+  draw(now);
+  if (now - App.uiAt > 200) { App.uiAt = now; renderReadouts(); renderInspector(); renderUnis(); syncLaws(); }
+  requestAnimationFrame(frame);
+}
+
+// ─── Boot ───
+async function boot() {
+  const total = BOOT_LINES.length;
+  for (let i = 0; i < total && App.state === 'booting'; i++) {
+    const li = document.createElement('li');
+    li.innerHTML = '› ' + BOOT_LINES[i] + (i < total - 1 ? ' … <b>ok</b>' : '.');
+    bootLines.appendChild(li);
+    const pct = Math.round(((i + 1) / total) * 100);
+    bootBar.querySelector('i').style.width = pct + '%';
+    bootBar.setAttribute('aria-valuenow', String(pct));
+    await wait(REDUCED ? 60 : 300);
+  }
+  finishBoot();
+}
+function finishBoot() {
+  if (App.state !== 'booting') return;
+  App.state = 'running';
+  bootEl.classList.add('done');
+  bootBar.setAttribute('aria-valuenow', '100');
+  setTimeout(() => bootEl.remove(), 600);
+  print('GodMod 2.0 · Reality control suite. Type help() for the API, or press "Run the story transcript".', 'sys');
+  print('gm is already imported. Bodies in the viewport can be bound with their Terminal handle button.', 'sys');
+  log('Console awake. Operator: unregistered. Access granted anyway.', 'exotic');
+  renderReadouts();
+}
+
+// ─── Listeners ───
+toolsEl.addEventListener('click', (e) => { const t = e.target.closest('[data-tool]'); if (t) setTool(t.dataset.tool); });
+
+lawsEl.addEventListener('input', (e) => {
+  const k = e.target.dataset.const; if (!k) return;
+  const l = LAWS.find((x) => x.key === k), u = U(), before = u.laws[k];
+  u.laws[k] = sliderToLaw(l, +e.target.value);
+  if (k === 'dims' && before !== u.laws[k]) dimsNote(u);
+  syncLaws();
+});
+lawsEl.addEventListener('change', (e) => {
+  const k = e.target.dataset.const; if (!k || k === 'dims') return;
+  const l = LAWS.find((x) => x.key === k);
+  log(l.name + ' set to ' + lawText(l, U().laws[k]) + '.', 'warn');
+});
+lawsEl.addEventListener('click', (e) => { if (e.target.id === 'resetLaws') { const u = U(); LAWS.forEach((l) => { u.laws[l.key] = l.def; }); syncLaws(); log('Physical laws restored to factory values.'); } });
+
+unisEl.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-uni]'); if (!b) return;
+  if (b.dataset.uni === 'new') {
+    const name = 'Universe-' + (App.multiverse.length + 1);
+    const u = makeUniverse(name); App.multiverse.push(u); bigBang(u, true);
+    log("Universe '" + name + "' created.", 'exotic');
+    switchUniverse(App.multiverse.length - 1);
+  } else switchUniverse(+b.dataset.uni);
+});
+
+inspEl.addEventListener('click', (e) => {
+  const p = e.target.closest('[data-pick]');
+  if (p) { App.selectedId = +p.dataset.pick; const b = bodyById(U(), App.selectedId); if (b) App.cam.target = { x: b.x, y: b.y, zoom: Math.max(App.cam.zoom, fitZoom()) }; return; }
+  const a = e.target.closest('button[data-act]');
+  if (a) bodyAction(a.dataset.act);
+});
+inspEl.addEventListener('submit', (e) => { e.preventDefault(); bodyAction('seed', e.target); });
+
+btn.pause.addEventListener('click', () => { App.paused = !App.paused; });
+btn.slower.addEventListener('click', () => changeRate(-1));
+btn.faster.addEventListener('click', () => changeRate(1));
+btn.rewind.addEventListener('click', () => rewind(U(), 5));
+btn.bang.addEventListener('click', () => bigBang(U()));
+btn.help.addEventListener('click', () => toggleHelp(true));
+btn.story.addEventListener('click', runStory);
+btn.clear.addEventListener('click', () => { termOut.innerHTML = ''; });
+$('#helpClose').addEventListener('click', () => toggleHelp(false));
+helpEl.addEventListener('click', (e) => { if (e.target === helpEl) toggleHelp(false); });
+$('#zoomIn').addEventListener('click', () => zoomAt(App.W / 2, App.H / 2, 1.3));
+$('#zoomOut').addEventListener('click', () => zoomAt(App.W / 2, App.H / 2, 1 / 1.3));
+$('#zoomFit').addEventListener('click', () => { App.followId = null; fitView(); });
+
+function toggleHelp(open) {
+  helpEl.hidden = !open;
+  if (open) $('#helpClose').focus();
+}
+
+termForm.addEventListener('submit', (e) => { e.preventDefault(); const v = termIn.value; termIn.value = ''; runLine(v); });
+termIn.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowUp') { e.preventDefault(); if (App.histIdx > 0) { App.histIdx--; termIn.value = App.history[App.histIdx] || ''; } }
+  else if (e.key === 'ArrowDown') { e.preventDefault(); if (App.histIdx < App.history.length) { App.histIdx++; termIn.value = App.history[App.histIdx] || ''; } }
+  else if (e.key === 'Tab') { e.preventDefault(); termIn.value = complete(termIn.value); }
+  else if (e.key === 'Escape') { termIn.blur(); }
+});
+
+canvas.addEventListener('pointerdown', (e) => {
+  canvas.setPointerCapture(e.pointerId);
+  const r = canvas.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top, [wx, wy] = toWorld(sx, sy);
+  const P = { id: e.pointerId, sx0: sx, sy0: sy, wx0: wx, wy0: wy, moved: false, mode: 'pan', lastT: performance.now(), lastWx: wx, lastWy: wy, vx: 0, vy: 0 };
+  if (e.button === 0) {
+    const hit = hitBody(sx, sy);
+    if (App.tool === 'select') { if (hit) { App.selectedId = hit.id; P.mode = 'drag'; P.body = hit; hit.held = true; } else P.mode = 'pan'; }
+    else if (['planet', 'star', 'blackhole'].includes(App.tool)) P.mode = 'spawn';
+    else P.mode = 'click', P.hit = hit;
+  }
+  App.pointer = P;
+});
+canvas.addEventListener('pointermove', (e) => {
+  const r = canvas.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top, [wx, wy] = toWorld(sx, sy);
+  Object.assign(App.mouse, { sx, sy, wx, wy, inside: true });
+  const P = App.pointer;
+  if (!P) { const h = hitBody(sx, sy); App.hoverId = h ? h.id : null; if (App.tool === 'select') canvas.style.cursor = h ? 'pointer' : 'default'; return; }
+  if (Math.hypot(sx - P.sx0, sy - P.sy0) > 5) P.moved = true;
+  if (P.mode === 'pan' && P.moved) {
+    App.followId = null; App.cam.target = null;
+    App.cam.x -= (e.movementX || 0) / App.cam.zoom; App.cam.y -= (e.movementY || 0) / App.cam.zoom;
+  } else if (P.mode === 'drag' && P.body) {
+    const now = performance.now(), dt = Math.max(0.008, (now - P.lastT) / 1000);
+    P.vx = lerp(P.vx, (wx - P.lastWx) / dt, 0.5); P.vy = lerp(P.vy, (wy - P.lastWy) / dt, 0.5);
+    P.lastT = now; P.lastWx = wx; P.lastWy = wy;
+    P.body.x = wx; P.body.y = wy; P.body.trail = [];
+  }
+});
+canvas.addEventListener('pointerleave', () => { App.mouse.inside = false; });
+canvas.addEventListener('pointerup', (e) => {
+  const P = App.pointer; App.pointer = null;
+  if (!P) return;
+  const u = U(), r = canvas.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top, [wx, wy] = toWorld(sx, sy);
+  if (P.mode === 'pan' && !P.moved && e.button === 0) App.selectedId = null;
+  if (P.mode === 'drag' && P.body) {
+    P.body.held = false;
+    if (P.moved) { const k = 0.35 / Math.max(1, curRate()), cap = C0 * u.laws.c * 0.5; P.body.vx = clamp(P.vx * k, -cap, cap); P.body.vy = clamp(P.vy * k, -cap, cap); }
+  }
+  if (P.mode === 'spawn') {
+    if (P.moved) spawnAt(App.tool, P.wx0, P.wy0, (wx - P.wx0) * 1.4, (wy - P.wy0) * 1.4);
+    else spawnAt(App.tool, wx, wy);
+  }
+  if (P.mode === 'click' && !P.moved) clickTool(u, P.hit, wx, wy);
+});
+canvas.addEventListener('dblclick', (e) => {
+  const r = canvas.getBoundingClientRect(), h = hitBody(e.clientX - r.left, e.clientY - r.top);
+  if (h) { App.selectedId = h.id; App.followId = h.id; }
+});
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const r = canvas.getBoundingClientRect();
+  zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.0015));
+}, { passive: false });
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+function clickTool(u, hit, wx, wy) {
+  if (App.tool === 'wormhole') {
+    const m = hit ? { bodyId: hit.id, ox: 0, oy: 0, x: hit.x, y: hit.y, label: hit.name } : { bodyId: null, ox: 0, oy: 0, x: wx, y: wy, label: (wx / L0).toFixed(1) + ',' + (wy / L0).toFixed(1) + ' AU' };
+    if (hit) { const a = Math.random() * Math.PI * 2, d = hit.r + 22; m.ox = Math.cos(a) * d; m.oy = Math.sin(a) * d; }
+    if (!App.pendingMouth) { App.pendingMouth = m; notice('Entrance set. Click the exit.'); }
+    else { u.wormholes.push({ a: App.pendingMouth, b: m, r: 12 }); log('Wormhole ' + App.pendingMouth.label + ' ⟷ ' + m.label + ' opened.', 'exotic'); App.pendingMouth = null; }
+  } else if (App.tool === 'supernova') {
+    if (hit && hit.type === 'star') supernova(u, hit); else notice('Pick a star. Planets do not go supernova.');
+  } else if (App.tool === 'grb') {
+    gammaBurst(u, wx, wy, 10);
+  } else if (App.tool === 'life') {
+    if (!hit || !(hit.type === 'planet' || hit.type === 'moon')) notice('Pick a planet or moon.');
+    else if (hit.life) notice(hit.name + ' is already inhabited by ' + hit.life.species + '.');
+    else { const sp = speciesName(); seedLife(hit, sp, 1e6, 0); App.selectedId = hit.id; log('Life seeded on ' + hit.name + ': ' + sp + '.', 'life'); }
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  if (App.state === 'booting') { finishBoot(); return; }
+  if (!helpEl.hidden) { if (e.key === 'Escape' || e.key === '?') { e.preventDefault(); toggleHelp(false); } return; }
+  if (isTyping(e.target)) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const u = U();
+  const tool = TOOLS.find((t) => t.key === e.key);
+  if (tool) { setTool(tool.id); return; }
+  switch (e.key) {
+    case ' ': e.preventDefault(); App.paused = !App.paused; break;
+    case '[': changeRate(-1); break;
+    case ']': changeRate(1); break;
+    case '`': case '/': e.preventDefault(); termIn.focus(); break;
+    case '?': toggleHelp(true); break;
+    case 'Escape': App.selectedId = null; App.followId = null; App.pendingMouth = null; setTool('select'); break;
+    case 'Delete': case 'Backspace': { const b = bodyById(u, App.selectedId); if (b) unmake(u, b); break; }
+    case 'f': case 'F': { const b = bodyById(u, App.selectedId); App.followId = b && App.followId !== b.id ? b.id : null; break; }
+    case '0': App.followId = null; fitView(); break;
+    case '+': case '=': zoomAt(App.W / 2, App.H / 2, 1.3); break;
+    case '-': zoomAt(App.W / 2, App.H / 2, 1 / 1.3); break;
+    case 'r': case 'R': rewind(u, 5); break;
+    case 'B': if (e.shiftKey) bigBang(u); break;
+    case 'n': case 'N': { const n = u.nebulae[u.nebulae.length - 1]; if (n) { App.followId = null; App.cam.target = { x: n.x, y: n.y, zoom: Math.min(fitZoom(), (App.W * 0.8) / 840) }; } break; }
+  }
+});
+bootEl.addEventListener('click', finishBoot);
+new ResizeObserver(resize).observe(viewportEl);
+
+// ─── Init ───
+readColors();
+document.querySelectorAll('[data-glyphs]').forEach((n) => { n.outerHTML = glyphStrip(hashSeed(n.dataset.seed || 'x'), +n.dataset.glyphs); });
+makeBgStars();
+App.multiverse.push(defaultUniverse());
+App.vars.set('gm', MODULE);
+App.vars.set('godmod', MODULE);
+renderLaws();
+renderTools();
+setTool('select');
+renderUnis();
+$('#helpKeys').innerHTML = [
+  ['Pause / resume', 'Space'], ['Slower / faster', '[  ]'], ['Instruments', '1 – 8'], ['Focus terminal', '/'],
+  ['Follow selected', 'F'], ['Fit view', '0'], ['Zoom', '+  −  wheel'], ['Rewind 5 Myr', 'R'],
+  ['Unmake selected', 'Delete'], ['Fly to nebula', 'N'], ['Big Bang', 'Shift+B'], ['Deselect / cancel', 'Esc'],
+  ['Terminal history', '↑  ↓'], ['Terminal completion', 'Tab'],
+].map(([a, k]) => '<div class="k"><span>' + a + '</span><kbd>' + k + '</kbd></div>').join('');
+$('#helpApi').innerHTML = apiReference() + '\n\n<b>Notes</b>\n    Distances: 1 AU = 150 units. One orbit at 1 AU = 1 Myr of cosmic time.\n    Constants take SI values: set_gravitational_constant(1.3348e-10) doubles G.\n    Life needs 3 dimensions, sane h and c, and a surface between ~255 K and 325 K.';
+resize();
+window.GodMod = { App, run: runLine, U, GM, advance: (sec) => advance(U(), sec, 0) }; // probe API: drive the sim without the frame loop
+requestAnimationFrame(frame);
+boot();
+</script>
+</body>
+</html>
