@@ -1,190 +1,274 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GodMod Library Documentation</title>
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --accent-color: #e74c3c;
-            --background-color: #ecf0f1;
-            --text-color: #2c3e50;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            color: var(--text-color);
-            background-color: var(--background-color);
-        }
-        #top-nav {
-            background-color: var(--primary-color);
-            padding: 10px;
-            text-align: center;
-        }
-        #top-nav a {
-            color: white;
-            text-decoration: none;
-            padding: 5px 10px;
-            margin: 0 5px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        #top-nav a:hover {
-            background-color: var(--accent-color);
-        }
-        #nav {
-            width: 250px;
-            height: 100vh;
-            overflow-y: auto;
-            background-color: var(--secondary-color);
-            padding: 20px;
-            position: fixed;
-            box-sizing: border-box;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            top: 0;
-        }
-        #nav img {
-            max-width: 80%;
-            height: auto;
-            margin-bottom: 20px;
-            border-radius: 10px;
-        }
-        #content {
-            margin-left: 250px;
-            padding: 20px;
-            flex-grow: 1;
-            max-width: calc(100% - 250px);
-            box-sizing: border-box;
-            margin-top: 50px; /* This accounts for the top navigation bar */
-        } 
-        h1, h2, h3 {
-            color: var(--accent-color);
-        }
-        h1.title {
-            font-size: 1.5em;
-            margin: 10px 0;
-            text-align: center;
-            color: white;
-        }
-        a {
-            color: var(--accent-color);
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        pre {
-            background-color: var(--secondary-color);
-            color: #abb2bf;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-        }
-        code {
-            font-family: 'Courier New', Courier, monospace;
-        }
-        #nav ul {
-            list-style-type: none;
-            padding: 0;
-            width: 100%;
-        }
-        #nav li {
-            margin-bottom: 10px;
-        }
-    </style>
-</style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/atom-one-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GodMod — a Python library for universes, physics and life</title>
+<meta name="description" content="GodMod is a low-level Python library for creating universes, physics and life: celestial mechanics, physical constants, time, quantum states, genetics and black holes. pip install godmod.">
+<link rel="icon" href="favicon.ico">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script>
 </head>
 <body>
-    <nav id="top-nav">
-        <a href="index.html">Home</a>
-        <a href="godmod_docs_website.html">GodMod Docs</a>
-        <a href="godmod_individual_website.html">Life Extension Docs</a>
-        <a href="tutorial_uni.html">Tutorial</a>
-        <a href="godmod.html">GodMod Code</a>
-        <a href="individual.html">Extension Code</a>
-    </nav>
-    <nav id="nav">
-        <img src="https://cdn.midjourney.com/3971e92a-c021-4780-8387-4b9cee3395e4/0_0.png" alt="GodMod Story">
-        <h1 class="title">GodMod Library Documentation</h1>
-        <!-- Navigation content will be inserted here -->
-    </nav>
-    <main id="content">
-        <img src='godmod.gif' height= 300>
-        <h1 id="The God Machine">The God Machine</h1>
-<p>Dr. Elena Kovacs peered through the viewscreen of the exploration vessel <em>Curiosity</em>, her breath catching in her throat. There, floating serenely in the inky blackness of space, was an alien spacecraft. Its sleek, silvery hull gleamed in the light of a distant star, its design unlike anything humanity had ever encountered.</p>
-<p>"Captain," Elena called out, her voice trembling with excitement, "you need to see this."</p>
-<p>Captain Jared Chen floated over, his eyes widening as he took in the sight. "My God," he whispered. "It's beautiful."</p>
-<p>As the <em>Curiosity</em> approached the alien vessel, it became clear that it was abandoned. No life signs registered on their scanners, and the ship's systems appeared to be in a dormant state.</p>
-<p>"Prepare for boarding," Captain Chen ordered, his voice steady despite the gravity of the situation.</p>
-<p>Elena's heart raced as she donned her spacesuit. This was the moment every xenoarchaeologist dreamed of—first contact with an alien civilization, even if it was long gone.</p>
-<p>The boarding party entered the alien ship through an airlock that cycled open at their approach. Inside, they found corridors lined with strange, pulsating lights and surfaces that seemed to shift and change as they watched.</p>
-<p>"Over here!" called Dr. Yuki Tanaka, the team's xenobiologist. "I think I've found their bridge."</p>
-<p>The group gathered around a central console, its surface covered in unfamiliar symbols and pulsing with an eerie blue light. Elena ran her gloved hand over the controls, and suddenly, the entire room hummed to life.</p>
-<p>A holographic display flickered into existence above the console, filled with lines of code that scrolled by faster than the human eye could follow. Elena gasped as she recognized some of the function names.</p>
-<p>"This... this is impossible," she muttered, her mind reeling.</p>
-<p>"What is it?" Captain Chen asked, concern evident in his voice.</p>
-<p>Elena took a deep breath before responding. "Captain, if I'm reading this correctly, this isn't just a spaceship. It's... it's a god machine. This code... it's called 'GodMod.' It seems to be a library capable of manipulating the very fabric of the universe."</p>
-<p>The team fell silent, the implications of Elena's words sinking in.</p>
-<p>"Look here," Elena continued, pointing to sections of the code. "There are modules for managing entire universes, controlling celestial mechanics, manipulating time itself. They even have functions for creating and managing life forms, controlling weather on a planetary scale, and manipulating dark matter and energy."</p>
-<p>Dr. Tanaka leaned in, her eyes wide with wonder. "Are you saying these aliens had the power to reshape reality at will?"</p>
-<p>Elena nodded slowly. "It appears so. And now... now we have access to that power."</p>
-<p>Captain Chen's face was grave as he considered the situation. "The question is, do we dare use it? Should we even bring this information back to Earth?"</p>
-<p>As if in response to the captain's words, a new section of code appeared on the holographic display. Elena read it aloud:</p>
-<pre class="codehilite"><code class="language-python">import godmod as gm
+<a class="skip" href="#main">Skip to content</a>
 
-universe = gm.Universe(name='MilkyWay')
-earth = gm.CelestialBody(name='Earth', type='planet')
+<header class="nav">
+  <div class="inner">
+    <a class="brand" href="index.html">
+      <img src="favicon.ico" alt="">
+      <span class="name">GodMod</span>
+      <span class="pill">v2.0.0</span>
+    </a>
+    <nav class="links" id="nav-links" aria-label="Main">
+      <a href="index.html" class="on">Home</a>
+      <a href="#story">Story</a>
+      <a href="godmod_docs_website.html">Docs</a>
+      <a href="godmod_individual_website.html">Life Extension</a>
+      <a href="tutorial_uni.html">Tutorial</a>
+      <a href="godmod.html">Code</a>
+    </nav>
+    <div class="actions">
+      <a class="btn ghost small" href="https://github.com/workszop/godmod">GitHub</a>
+      <button class="btn small" data-copy="pip install godmod">pip install godmod</button>
+      <button class="toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <section class="section">
+      <span class="pill amber">Python · MIT · 27 modules</span>
+      <h1 style="margin-top:14px">Pick a force. Bend it.</h1>
+      <p class="lede">GodMod is a low-level library for universe manipulation. Create planets, evolve
+        populations, tune the speed of light, collapse a wave function, or open a wormhole to
+        Andromeda — all from the same nine-line program.</p>
+      <div class="btn-row">
+        <button class="btn" data-copy="pip install godmod">pip install godmod</button>
+        <a class="btn ghost" href="godmod_docs_website.html#quick-start-guide">Quick start →</a>
+        <a class="btn ghost" href="tutorial_uni.html">Build an alien universe</a>
+      </div>
+      <div class="stats">
+        <div><b>27</b><span>modules</span></div>
+        <div><b>0</b><span>dependencies</span></div>
+        <div><b>3.7+</b><span>Python</span></div>
+        <div><b>MIT</b><span>license</span></div>
+      </div>
+    </section>
+
+    <div class="feature">
+      <span class="label">the animation</span>
+      <img src="assets/img/godmod-loop.webp" alt="GodMod artwork — an animated loop of a figure over a spiral of worlds">
+      <div class="over">
+        <h2>Twenty-seven modules, one multiverse</h2>
+        <p>Everything from the weather on a single planet to the density of dark energy, callable from
+          the same library. The art is the project's own — an eighteen-frame animation that ships with
+          the repository.</p>
+      </div>
+    </div>
+
+    <section class="section" id="modules">
+      <h2 style="margin-top:0">Start with these</h2>
+      <p class="lede">Every module has the same shape: create the thing, then meddle with it. These are
+        the ones people reach for first.</p>
+
+      <div class="gal">
+        <a class="gc" href="godmod_docs_website.html#universe-management">
+          <div class="thumb"><img src="assets/img/godmod-frame-00.webp" alt=""></div>
+          <div class="body">
+            <h3>Universe Management</h3>
+            <p>Create, merge and destroy universes. Big bang scheduling included.</p>
+            <span class="tag">Universe</span>
+          </div>
+        </a>
+        <a class="gc" href="godmod_docs_website.html#black-hole-dynamics">
+          <div class="thumb"><img src="assets/img/godmod-frame-04.webp" alt=""></div>
+          <div class="body">
+            <h3>Black Hole Dynamics</h3>
+            <p>Place, stabilise and feed one. Local real estate values may be affected.</p>
+            <span class="tag">BlackHole</span>
+          </div>
+        </a>
+        <a class="gc" href="godmod_docs_website.html#life-form-management">
+          <div class="thumb"><img src="assets/img/godmod-frame-08.webp" alt=""></div>
+          <div class="body">
+            <h3>Life Form Management</h3>
+            <p>Populations, extinctions, and evolving things with more appendages.</p>
+            <span class="tag">LifeForm</span>
+          </div>
+        </a>
+        <a class="gc" href="godmod_docs_website.html#time-manipulation">
+          <div class="thumb"><img src="assets/img/godmod-frame-16.webp" alt=""></div>
+          <div class="body">
+            <h3>Time Manipulation</h3>
+            <p>Speed up, slow down, pause, rewind. Perfect for procrastinators.</p>
+            <span class="tag">Time</span>
+          </div>
+        </a>
+        <a class="gc" href="godmod_docs_website.html#genetic-engineering">
+          <div class="thumb"><img src="assets/img/godmod-frame-12.webp" alt=""></div>
+          <div class="body">
+            <h3>Genetic Engineering</h3>
+            <p>Edit genes, clone organisms, splice hybrids nobody asked for.</p>
+            <span class="tag">GeneticCode</span>
+          </div>
+        </a>
+        <a class="gc" href="godmod_docs_website.html#weather-control">
+          <div class="thumb"><img src="assets/img/godmod-frame-00.webp" alt=""></div>
+          <div class="body">
+            <h3>Weather Control</h3>
+            <p>Rain, sun, snow, storms, planetary temperature. Umbrellas recommended.</p>
+            <span class="tag">Weather</span>
+          </div>
+        </a>
+        <a class="gc" href="godmod_docs_website.html#multiverse-management">
+          <div class="thumb"><img src="assets/img/godmod-frame-08.webp" alt=""></div>
+          <div class="body">
+            <h3>Multiverse</h3>
+            <p>Parallel universes, divergence points, and travel between them.</p>
+            <span class="tag">Multiverse</span>
+          </div>
+        </a>
+        <a class="gc" href="godmod_docs_website.html#quantum-mechanics-control">
+          <div class="thumb"><img src="assets/img/godmod-frame-04.webp" alt=""></div>
+          <div class="body">
+            <h3>Quantum Mechanics</h3>
+            <p>Superposition, entanglement, and collapsing things just by looking.</p>
+            <span class="tag">QuantumState</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="btn-row">
+        <a class="btn ghost" href="godmod_docs_website.html#modules">All 27 modules →</a>
+        <a class="btn ghost" href="godmod_individual_website.html">Life Extension add-on →</a>
+      </div>
+    </section>
+
+    <section class="section soft" aria-labelledby="install">
+      <div class="grid2">
+        <div>
+          <h2 id="install" style="margin-top:0">Install it. Irreversibly.</h2>
+          <p>No dependencies, Python 3.7 or higher, MIT licensed. The snippet beside this runs as
+            printed: save it as <code>quickstart.py</code> next to <code>godmod.py</code> and it creates a
+            universe, adds a planet, populates it and makes it rain. The repository's own demo is
+            <code>python3 godmod.py</code>.</p>
+          <div class="callout">
+            <span class="ic">⚠️</span>
+            <p><b>Straight answer:</b> this reference documents the full intended API. A few modules are
+              written up ahead of the code — see the status note on the
+              <a href="godmod_docs_website.html#status">docs page</a>.</p>
+          </div>
+        </div>
+        <div>
+          <div class="code">
+            <button class="copy">copy</button>
+<pre><span class="c"># install, then it is your multiverse</span>
+<span class="k">$</span> pip install godmod
+
+<span class="c"># quickstart.py — runs as printed against godmod.py</span>
+<span class="k">import</span> godmod <span class="k">as</span> gm
+
+universe = gm.Universe(name=<span class="s">"MilkyWay"</span>)
+earth    = gm.CelestialBody(name=<span class="s">"Earth"</span>, type=<span class="s">"planet"</span>)
 universe.add_body(earth)
 
-humans = gm.LifeForm(name='Humans', planet=earth)
-humans.evolve(intelligence_level=10)
+humans = gm.LifeForm(name=<span class="s">"Humans"</span>, planet=earth)
+humans.create_population(<span class="s">7_000_000_000</span>)
+humans.evolve(<span class="s">1_000_000</span>)
 
-message = gm.CosmicEvent()
-message.create_nebula(location='AlphaCentauri')
-message.shape_nebula(shape='Welcome, Inheritors')
-</code></pre>
+weather = gm.Weather(earth)
+weather.set_rain(<span class="s">60</span>)</pre>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<p>The team exchanged glances, a mix of awe and trepidation on their faces.</p>
-<p>"It seems," Elena said softly, "that whoever left this ship here intended for us to find it. They've left us a message... and a choice."</p>
-<p>Captain Chen nodded solemnly. "A test, perhaps. To see if we're ready for this kind of power."</p>
-<p>As the <em>Curiosity</em> began its long journey back to Earth, its crew wrestled with the monumental discovery they'd made. They carried with them not just the knowledge of an advanced alien civilization, but the very keys to creation itself.</p>
-<p>The question that weighed heavily on their minds was not whether they could reshape the universe, but whether they should. As they gazed out at the stars, each of them wondered: What would humanity do with the power of gods?</p>
-    </main>
+    <section class="section" aria-labelledby="story">
+      <h2 id="story" style="margin-top:0">The God Machine</h2>
+      <p class="lede">The story that came with the library, unchanged.</p>
+      <div class="story" style="margin-top:20px">
+        <div class="banner">
+          <img src="assets/img/godmod-frame-08.webp" alt="A figure seated among planets">
+        </div>
+        <div class="text">
+          <p>Dr. Elena Kovacs peered through the viewscreen of the exploration vessel <em>Curiosity</em>, her breath catching in her throat. There, floating serenely in the inky blackness of space, was an alien spacecraft. Its sleek, silvery hull gleamed in the light of a distant star, its design unlike anything humanity had ever encountered.</p>
+          <p>"Captain," Elena called out, her voice trembling with excitement, "you need to see this."</p>
+          <p>Captain Jared Chen floated over, his eyes widening as he took in the sight. "My God," he whispered. "It's beautiful."</p>
+          <p>As the <em>Curiosity</em> approached the alien vessel, it became clear that it was abandoned. No life signs registered on their scanners, and the ship's systems appeared to be in a dormant state.</p>
+          <p>"Prepare for boarding," Captain Chen ordered, his voice steady despite the gravity of the situation.</p>
+          <p>Elena's heart raced as she donned her spacesuit. This was the moment every xenoarchaeologist dreamed of—first contact with an alien civilization, even if it was long gone.</p>
+          <p>The boarding party entered the alien ship through an airlock that cycled open at their approach. Inside, they found corridors lined with strange, pulsating lights and surfaces that seemed to shift and change as they watched.</p>
+          <p>"Over here!" called Dr. Yuki Tanaka, the team's xenobiologist. "I think I've found their bridge."</p>
+          <p>The group gathered around a central console, its surface covered in unfamiliar symbols and pulsing with an eerie blue light. Elena ran her gloved hand over the controls, and suddenly, the entire room hummed to life.</p>
+          <p>A holographic display flickered into existence above the console, filled with lines of code that scrolled by faster than the human eye could follow. Elena gasped as she recognized some of the function names.</p>
+          <p>"This... this is impossible," she muttered, her mind reeling.</p>
+          <p>"What is it?" Captain Chen asked, concern evident in his voice.</p>
+          <p>Elena took a deep breath before responding. "Captain, if I'm reading this correctly, this isn't just a spaceship. It's... it's a god machine. This code... it's called 'GodMod.' It seems to be a library capable of manipulating the very fabric of the universe."</p>
+          <p>The team fell silent, the implications of Elena's words sinking in.</p>
+          <p>"Look here," Elena continued, pointing to sections of the code. "There are modules for managing entire universes, controlling celestial mechanics, manipulating time itself. They even have functions for creating and managing life forms, controlling weather on a planetary scale, and manipulating dark matter and energy."</p>
+          <p>Dr. Tanaka leaned in, her eyes wide with wonder. "Are you saying these aliens had the power to reshape reality at will?"</p>
+          <p>Elena nodded slowly. "It appears so. And now... now we have access to that power."</p>
+          <p>Captain Chen's face was grave as he considered the situation. "The question is, do we dare use it? Should we even bring this information back to Earth?"</p>
+          <p>As if in response to the captain's words, a new section of code appeared on the holographic display. Elena read it aloud:</p>
+          <div class="code">
+                      <button class="copy" type="button">copy</button>
+          <pre>import godmod as gm
+          
+          universe = gm.Universe(name='MilkyWay')
+          earth = gm.CelestialBody(name='Earth', type='planet')
+          universe.add_body(earth)
+          
+          humans = gm.LifeForm(name='Humans', planet=earth)
+          humans.evolve(intelligence_level=10)
+          
+          message = gm.CosmicEvent()
+          message.create_nebula(location='AlphaCentauri')
+          message.shape_nebula(shape='Welcome, Inheritors')</pre>
+                    </div>
+          
+          <p>The team exchanged glances, a mix of awe and trepidation on their faces.</p>
+          <p>"It seems," Elena said softly, "that whoever left this ship here intended for us to find it. They've left us a message... and a choice."</p>
+          <p>Captain Chen nodded solemnly. "A test, perhaps. To see if we're ready for this kind of power."</p>
+          <p>As the <em>Curiosity</em> began its long journey back to Earth, its crew wrestled with the monumental discovery they'd made. They carried with them not just the knowledge of an advanced alien civilization, but the very keys to creation itself.</p>
+          <p>The question that weighed heavily on their minds was not whether they could reshape the universe, but whether they should. As they gazed out at the stars, each of them wondered: What would humanity do with the power of gods?</p>
+        </div>
+      </div>
+    </section>
 
-    <script>
-        // Highlight.js initialization
-        hljs.highlightAll();
+  </div>
+</main>
 
-        // Function to create the navigation menu
-        function createNavMenu() {
-            const nav = document.getElementById('nav');
-            const headers = document.querySelectorAll('#content h1');
-            const ul = document.createElement('ul');
-
-            headers.forEach(header => {
-                const li = document.createElement('li');
-                const a = document.createElement('a');
-                a.textContent = header.textContent;
-                a.href = `#${header.id}`;
-                li.appendChild(a);
-                ul.appendChild(li);
-            });
-
-            nav.appendChild(ul);
-        }
-
-        // Call the function after the content is loaded
-        window.addEventListener('load', createNavMenu);
-    </script>
+<footer class="foot">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4>Documentation</h4>
+        <a href="index.html#story">The God Machine</a>
+        <a href="godmod_docs_website.html">GodMod library</a>
+        <a href="godmod_individual_website.html">Life Extension</a>
+        <a href="tutorial_uni.html">Tutorial</a>
+        <a href="godmod_docs_website.html#faq">FAQ</a>
+      </div>
+      <div>
+        <h4>Code</h4>
+        <a href="godmod.html">godmod.py</a>
+        <a href="individual.html">Life Extension source</a>
+        <a href="https://github.com/workszop/godmod">GitHub repository</a>
+      </div>
+      <div>
+        <h4>Project</h4>
+        <a href="godmod_docs_website.html#license">License (MIT)</a>
+        <a href="godmod_docs_website.html#contributing">Contributing</a>
+        <a href="https://github.com/workszop/godmod/issues">Issues</a>
+      </div>
+    </div>
+    <div class="base">
+      <span>MIT © 2024 GodMod contributors</span>
+      <span>Artwork: <code>godmod.gif</code> — 18 frames, shipped with the repository</span>
+    </div>
+  </div>
+</footer>
 </body>
 </html>

@@ -1,67 +1,54 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GodMod 2.0 Code Display</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #282c34;
-            color: #abb2bf;
-            line-height: 1.6;
-            padding: 20px;
-            margin: 0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #21252b;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #61afef;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        pre {
-            margin: 0;
-            padding: 20px;
-            border-radius: 4px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        code {
-            font-family: 'Courier New', Courier, monospace;
-        }
-        .back-button {
-            display: inline-block;
-            background-color: #61afef;
-            color: #282c34;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            transition: background-color 0.3s ease;
-        }
-        .back-button:hover {
-            background-color: #528bbc;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>godmod.py — GodMod source</title>
+<meta name="description" content="GodMod 2.0 — the whole library in one module. No dependencies, Python 3.7+.">
+<link rel="icon" href="favicon.ico">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script>
 </head>
 <body>
-    <div class="container">
-        <a href="index.html" class="back-button">Back to Index</a>
-        <h1>GodMod 2.0 Python Code</h1>
-        <pre><code class="language-python">
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav">
+  <div class="inner">
+    <a class="brand" href="index.html">
+      <img src="favicon.ico" alt="">
+      <span class="name">GodMod</span>
+      <span class="pill">v2.0.0</span>
+    </a>
+    <nav class="links" id="nav-links" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="godmod_docs_website.html">Docs</a>
+      <a href="godmod_individual_website.html">Life Extension</a>
+      <a href="tutorial_uni.html">Tutorial</a>
+      <a href="godmod.html" class="on">Code</a>
+    </nav>
+    <div class="actions">
+      <a class="btn ghost small" href="https://github.com/workszop/godmod">GitHub</a>
+      <button class="btn small" data-copy="pip install godmod">pip install godmod</button>
+      <button class="toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    </div>
+  </div>
+</header>
 
-import random
+<main id="main">
+  <div class="viewer">
+    <div class="head">
+      <div>
+        <h1>godmod.py</h1>
+        <p>GodMod 2.0 — the whole library in one module. No dependencies, Python 3.7+.</p>
+      </div>
+      <div class="spacer">
+        <a class="btn ghost small" href="godmod.py">Download godmod.py</a>
+        <a class="btn ghost small" href="https://github.com/workszop/godmod/blob/main/godmod.py">View on GitHub</a>
+      </div>
+    </div>
+    <div class="callout info"><span class="ic">🐍</span><p>This is the shipped module. <code>python3 godmod.py</code> runs the demo: it creates a universe, populates it, nudges a physical constant (off by one, on purpose) and narrates the whole crime.</p></div>
+    <div class="code">
+      <button class="copy" type="button">copy</button>
+<pre>import random
 from typing import List, Dict, Any, Tuple
 import math
 
@@ -72,21 +59,21 @@ class Universe:
         self.physical_laws = PhysicalLaws()
         print(f"🌌 Universe '{name}' created. Don't forget to pay the electricity bill!")
 
-    def add_body(self, body: 'CelestialBody') -> None:
+    def add_body(self, body: 'CelestialBody') -&gt; None:
         self.bodies.append(body)
         print(f"✨ {body.name} added to {self.name}. It's getting crowded in here!")
 
-    def remove_body(self, body: 'CelestialBody') -> None:
+    def remove_body(self, body: 'CelestialBody') -&gt; None:
         if body in self.bodies:
             self.bodies.remove(body)
             print(f"💨 {body.name} removed from {self.name}. Hope it wasn't load-bearing!")
         else:
             print(f"🤷‍♂️ {body.name} not found in {self.name}. Did you misplace a planet?")
 
-    def big_bang(self) -> None:
+    def big_bang(self) -&gt; None:
         print(f"💥 Initiating Big Bang in {self.name}. Hold onto your subatomic particles!")
 
-    def heat_death(self) -> None:
+    def heat_death(self) -&gt; None:
         print(f"🥶 {self.name} has reached heat death. Time to switch to the thermos universe!")
 
 class CelestialBody:
@@ -95,11 +82,11 @@ class CelestialBody:
         self.type = type
         print(f"🪐 {name} created. It's not much, but it's honest work.")
 
-    def set_orbit(self, orbiting_body_name: str, distance: float) -> None:
+    def set_orbit(self, orbiting_body_name: str, distance: float) -&gt; None:
         print(f"🛰️ {self.name} is now orbiting {orbiting_body_name} at a distance of {distance}m.")
         print("Warning: May cause dizziness in inhabitants.")
 
-    def collide(self, other: 'CelestialBody') -> None:
+    def collide(self, other: 'CelestialBody') -&gt; None:
         print(f"💥 {self.name} collided with {other.name}. That's gonna leave a mark!")
 
 class LifeForm:
@@ -108,13 +95,13 @@ class LifeForm:
         self.planet = planet
         print(f"🧬 {name} created on {planet.name}. Don't feed after midnight!")
 
-    def create_population(self, size: int) -> None:
+    def create_population(self, size: int) -&gt; None:
         print(f"👥 {size} {self.name}(s) created. Hope you have enough snacks!")
 
-    def extinct_population(self) -> None:
+    def extinct_population(self) -&gt; None:
         print(f"☠️ {self.name} population on {self.planet.name} gone. Did you forget to water them?")
 
-    def evolve(self, years: int) -> None:
+    def evolve(self, years: int) -&gt; None:
         print(f"🐒 {self.name} evolved over {years} years. Now with 50% more appendages!")
 
 class Weather:
@@ -122,13 +109,13 @@ class Weather:
         self.planet = planet
         print(f"🌡️ Weather system initialized for {planet.name}. Umbrellas recommended.")
 
-    def set_rain(self, duration: int) -> None:
+    def set_rain(self, duration: int) -&gt; None:
         print(f"🌧️ Rain set for {duration} minutes on {self.planet.name}. Don't forget your galoshes!")
 
-    def set_sun(self, duration: int) -> None:
+    def set_sun(self, duration: int) -&gt; None:
         print(f"☀️ Sunny weather set for {duration} minutes on {self.planet.name}. SPF 1000000 advised.")
 
-    def create_storm(self, intensity: int) -> None:
+    def create_storm(self, intensity: int) -&gt; None:
         print(f"🌪️ Storm of intensity {intensity} created on {self.planet.name}. Grab your ruby slippers!")
 
 class BlackHole:
@@ -137,10 +124,10 @@ class BlackHole:
         self.mass = mass
         print(f"🕳️ Black Hole '{name}' created. Please keep your arms and legs inside the event horizon at all times.")
 
-    def place_black_hole(self, location: str) -> None:
+    def place_black_hole(self, location: str) -&gt; None:
         print(f"🚀 {self.name} placed at {location}. Local real estate values may be affected.")
 
-    def consume(self, object: str) -> None:
+    def consume(self, object: str) -&gt; None:
         print(f"🍽️ {self.name} consumed {object}. Burp!")
 
 class PhysicalLaws:
@@ -149,15 +136,15 @@ class PhysicalLaws:
         self.speed_of_light = 299792458
         self.planck_constant = 6.62607015e-34
 
-    def set_gravitational_constant(self, value: float) -> None:
+    def set_gravitational_constant(self, value: float) -&gt; None:
         self.gravitational_constant = value
         print(f"🧲 Gravitational constant set to {value}. Wobbly walks incoming!")
 
-    def set_speed_of_light(self, value: float) -> None:
+    def set_speed_of_light(self, value: float) -&gt; None:
         self.speed_of_light = value
         print(f"💡 Speed of light adjusted to {value} m/s. Photons are confused but complying.")
 
-    def set_planck_constant(self, value: float) -> None:
+    def set_planck_constant(self, value: float) -&gt; None:
         self.planck_constant = value
         print(f"🔬 Planck constant set to {value}. Quantum realm is getting quirky!")
 
@@ -165,20 +152,20 @@ class Time:
     def __init__(self):
         self.current_year = 2024
 
-    def speed_up(self, factor: float) -> None:
+    def speed_up(self, factor: float) -&gt; None:
         print(f"⏩ Time sped up by factor of {factor}. Don't blink, you might miss a century!")
 
-    def slow_down(self, factor: float) -> None:
+    def slow_down(self, factor: float) -&gt; None:
         print(f"⏪ Time slowed down by factor of {factor}. Perfect for procrastinators!")
 
-    def pause(self) -> None:
+    def pause(self) -&gt; None:
         print("⏸️ Time paused. Bathroom break for the universe!")
 
-    def resume(self) -> None:
+    def resume(self) -&gt; None:
         print("▶️ Time resumed. Back to work, atoms!")
 
-    def travel(self, year: int) -> None:
-        direction = "future" if year > self.current_year else "past"
+    def travel(self, year: int) -&gt; None:
+        direction = "future" if year &gt; self.current_year else "past"
         print(f"🚀 Time traveled to year {year}. Welcome to the {direction}, where everything's made up and the points don't matter!")
         self.current_year = year
 
@@ -186,30 +173,30 @@ class QuantumMechanics:
     def __init__(self):
         self.particles = []
 
-    def create_particle(self, name: str, spin: float) -> None:
+    def create_particle(self, name: str, spin: float) -&gt; None:
         self.particles.append({"name": name, "spin": spin})
         print(f"🔬 Particle {name} created with spin {spin}. It's both here and there, until you look!")
 
-    def entangle(self, particle1: str, particle2: str) -> None:
+    def entangle(self, particle1: str, particle2: str) -&gt; None:
         print(f"🔗 {particle1} and {particle2} are now entangled. Spooky action at a distance activated!")
 
-    def collapse_wave_function(self, particle: str) -> str:
+    def collapse_wave_function(self, particle: str) -&gt; str:
         state = random.choice(["up", "down", "strange", "charm", "top", "bottom"])
         print(f"👀 Wave function of {particle} collapsed. It's feeling {state} today!")
         return state
 
 class DarkMatter:
-    def increase_density(self, amount: float) -> None:
+    def increase_density(self, amount: float) -&gt; None:
         print(f"🌑 Dark matter density increased by {amount}. It's getting darker in here!")
 
-    def decrease_density(self, amount: float) -> None:
+    def decrease_density(self, amount: float) -&gt; None:
         print(f"🔦 Dark matter density decreased by {amount}. Let there be (a bit more) light!")
 
 class DarkEnergy:
-    def increase_intensity(self, amount: float) -> None:
+    def increase_intensity(self, amount: float) -&gt; None:
         print(f"💨 Dark energy intensity increased by {amount}. Universe expansion in overdrive!")
 
-    def decrease_intensity(self, amount: float) -> None:
+    def decrease_intensity(self, amount: float) -&gt; None:
         print(f"🏋️ Dark energy intensity decreased by {amount}. Universe, you're looking a bit more fit!")
 
 class GeneticCode:
@@ -217,15 +204,15 @@ class GeneticCode:
         self.organism = organism
         print(f"🧬 Genetic code accessed for {organism}. Unleash your inner mad scientist!")
 
-    def edit_gene(self, gene: str, new_value: str) -> None:
+    def edit_gene(self, gene: str, new_value: str) -&gt; None:
         print(f"✏️ Gene {gene} edited to {new_value} in {self.organism}. What could possibly go wrong?")
 
-    def clone(self) -> str:
+    def clone(self) -&gt; str:
         clone_name = f"Clone of {self.organism}"
         print(f"🐑 {clone_name} created. It's getting crowded in here!")
         return clone_name
 
-    def splice(self, other_organism: str) -> str:
+    def splice(self, other_organism: str) -&gt; str:
         hybrid_name = f"{self.organism}-{other_organism} Hybrid"
         print(f"🧪 Created {hybrid_name}. Scientists were so preoccupied with whether they could, they didn't stop to think if they should.")
         return hybrid_name
@@ -235,11 +222,11 @@ class Ecosystem:
         self.planet = planet
         self.species = []
 
-    def add_species(self, species: str) -> None:
+    def add_species(self, species: str) -&gt; None:
         self.species.append(species)
         print(f"🦁 {species} added to {self.planet.name}'s ecosystem. Food chain: updated!")
 
-    def remove_species(self, species: str) -> None:
+    def remove_species(self, species: str) -&gt; None:
         if species in self.species:
             self.species.remove(species)
             print(f"🦕 {species} removed from {self.planet.name}'s ecosystem. Press F to pay respects.")
@@ -248,35 +235,35 @@ class Ecosystem:
 
 class Energy:
     @staticmethod
-    def create_energy_source(type: str, output: float) -> None:
+    def create_energy_source(type: str, output: float) -&gt; None:
         print(f"⚡ {type} energy source created with output of {output} gigawatts. Great Scott!")
 
     @staticmethod
-    def convert_matter_to_energy(mass: float) -> float:
+    def convert_matter_to_energy(mass: float) -&gt; float:
         energy = mass * (299792458 ** 2)  # E = mc^2
         print(f"💥 {mass} kg of matter converted to {energy} joules of energy. That's a lot of batteries!")
         return energy
 
 class CosmicEvent:
     @staticmethod
-    def supernova(star_name: str) -> None:
+    def supernova(star_name: str) -&gt; None:
         print(f"💥 {star_name} went supernova. It's not easy being a massive star!")
 
     @staticmethod
-    def gamma_ray_burst(duration: float) -> None:
+    def gamma_ray_burst(duration: float) -&gt; None:
         print(f"☢️ Gamma-ray burst detected! Duration: {duration} seconds. Duck and cover!")
 
 class Multiverse:
     def __init__(self):
         self.universes = []
 
-    def create_universe(self, name: str) -> Universe:
+    def create_universe(self, name: str) -&gt; Universe:
         new_universe = Universe(name)
         self.universes.append(new_universe)
         print(f"🎭 Universe '{name}' added to the multiverse. It's getting meta in here!")
         return new_universe
 
-    def merge_universes(self, universe1: Universe, universe2: Universe) -> Universe:
+    def merge_universes(self, universe1: Universe, universe2: Universe) -&gt; Universe:
         merged_name = f"{universe1.name}-{universe2.name}"
         merged_universe = Universe(merged_name)
         print(f"🔀 {universe1.name} and {universe2.name} merged into {merged_name}. Reality will never be the same!")
@@ -287,12 +274,12 @@ class Dimension:
         self.universe = universe
         self.num_dimensions = 4  # 3 spatial + 1 time
 
-    def add_dimension(self) -> None:
+    def add_dimension(self) -&gt; None:
         self.num_dimensions += 1
         print(f"➕ Dimension added to {self.universe.name}. Current dimensions: {self.num_dimensions}. Things are getting weird!")
 
-    def remove_dimension(self) -> None:
-        if self.num_dimensions > 1:
+    def remove_dimension(self) -&gt; None:
+        if self.num_dimensions &gt; 1:
             self.num_dimensions -= 1
             print(f"➖ Dimension removed from {self.universe.name}. Current dimensions: {self.num_dimensions}. Flatland, here we come!")
         else:
@@ -304,7 +291,7 @@ class Wormhole:
         self.exit = exit
         print(f"🕳️ Wormhole created from {entrance} to {exit}. Please keep your tentacles inside the vehicle at all times!")
 
-    def traverse(self, object: str) -> None:
+    def traverse(self, object: str) -&gt; None:
         print(f"🚀 {object} traversed the wormhole from {self.entrance} to {self.exit}. Hope it remembered to pack a towel!")
 
 def main():
@@ -338,3 +325,75 @@ def main():
     time = Time()
     time.speed_up(2)
     time.travel(3000)
+    
+    quantum = QuantumMechanics()
+    quantum.create_particle("Quirkon", 0.5)
+    quantum.entangle("Quirkon", "Shenanigon")
+    
+    dark_matter = DarkMatter()
+    dark_matter.increase_density(0.1)
+    
+    dark_energy = DarkEnergy()
+    dark_energy.increase_intensity(0.2)
+    
+    dna = GeneticCode("Platypus")
+    dna.edit_gene("BillShape", "Square")
+    hybrid = dna.splice("Giraffe")
+    
+    ecosystem = Ecosystem(earth)
+    ecosystem.add_species("Flying Spaghetti Monster")
+    
+    Energy.create_energy_source("Antimatter", 9000)
+    Energy.convert_matter_to_energy(0.001)
+    
+    CosmicEvent.supernova("Betelgeuse")
+    CosmicEvent.gamma_ray_burst(10.5)
+    
+    dimension = Dimension(universe)
+    dimension.add_dimension()
+    
+    wormhole = Wormhole("Milky Way", "Andromeda")
+    wormhole.traverse("Space Whale")
+    
+    print("\nCongratulations! You've successfully meddled with the fabric of the multiverse.")
+    print("Please use responsibly. Side effects may include parallel universes, time paradoxes, and mild indigestion.")
+    print("Remember: With great power comes great opportunity for hilarious cosmic mishaps!")
+
+if __name__ == "__main__":
+    main()</pre>
+    </div>
+  </div>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4>Documentation</h4>
+        <a href="index.html#story">The God Machine</a>
+        <a href="godmod_docs_website.html">GodMod library</a>
+        <a href="godmod_individual_website.html">Life Extension</a>
+        <a href="tutorial_uni.html">Tutorial</a>
+        <a href="godmod_docs_website.html#faq">FAQ</a>
+      </div>
+      <div>
+        <h4>Code</h4>
+        <a href="godmod.html">godmod.py</a>
+        <a href="individual.html">Life Extension source</a>
+        <a href="https://github.com/workszop/godmod">GitHub repository</a>
+      </div>
+      <div>
+        <h4>Project</h4>
+        <a href="godmod_docs_website.html#license">License (MIT)</a>
+        <a href="godmod_docs_website.html#contributing">Contributing</a>
+        <a href="https://github.com/workszop/godmod/issues">Issues</a>
+      </div>
+    </div>
+    <div class="base">
+      <span>MIT © 2024 GodMod contributors</span>
+      <span>Artwork: <code>godmod.gif</code> — 18 frames, shipped with the repository</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -309,4 +309,5 @@ def main():
     print("Please use responsibly. Side effects may include parallel universes, time paradoxes, and mild indigestion.")
     print("Remember: With great power comes great opportunity for hilarious cosmic mishaps!")
 
-if __name__ == "__main
+if __name__ == "__main__":
+    main()

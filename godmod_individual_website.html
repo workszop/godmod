@@ -1,142 +1,87 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GodMod Library Documentation</title>
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --accent-color: #e74c3c;
-            --background-color: #ecf0f1;
-            --text-color: #2c3e50;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            color: var(--text-color);
-            background-color: var(--background-color);
-        }
-        #top-nav {
-            background-color: var(--primary-color);
-            padding: 10px;
-            text-align: center;
-        }
-        #top-nav a {
-            color: white;
-            text-decoration: none;
-            padding: 5px 10px;
-            margin: 0 5px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        #top-nav a:hover {
-            background-color: var(--accent-color);
-        }
-        #nav {
-            width: 250px;
-            height: 100vh;
-            overflow-y: auto;
-            background-color: var(--secondary-color);
-            padding: 20px;
-            position: fixed;
-            box-sizing: border-box;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            top: 0;
-        }
-        #nav img {
-            max-width: 80%;
-            height: auto;
-            margin-bottom: 20px;
-            border-radius: 10px;
-        }
-        #content {
-            margin-left: 250px;
-            padding: 20px;
-            flex-grow: 1;
-            max-width: calc(100% - 250px);
-            box-sizing: border-box;
-            margin-top: 50px; /* This accounts for the top navigation bar */
-        } 
-        h1, h2, h3 {
-            color: var(--accent-color);
-        }
-        h1.title {
-            font-size: 1.5em;
-            margin: 10px 0;
-            text-align: center;
-            color: white;
-        }
-        a {
-            color: var(--accent-color);
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        pre {
-            background-color: var(--secondary-color);
-            color: #abb2bf;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-        }
-        code {
-            font-family: 'Courier New', Courier, monospace;
-        }
-        #nav ul {
-            list-style-type: none;
-            padding: 0;
-            width: 100%;
-        }
-        #nav li {
-            margin-bottom: 10px;
-        }
-    </style>
-</style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/atom-one-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GodMod Life Extension — documentation</title>
+<meta name="description" content="The GodMod Individual Beings extension: create and manage individual entities, their luck, fate, skills, relationships and life events.">
+<link rel="icon" href="favicon.ico">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script>
 </head>
 <body>
-    <nav id="top-nav">
-        <a href="index.html">Home</a>
-        <a href="godmod_docs_website.html">GodMod Docs</a>
-        <a href="godmod_individual_website.html">Life Extension Docs</a>
-        <a href="tutorial_uni.html">Tutorial</a>
-        <a href="godmod.html">GodMod Code</a>
-        <a href="individual.html">Extension Code</a>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav">
+  <div class="inner">
+    <a class="brand" href="index.html">
+      <img src="favicon.ico" alt="">
+      <span class="name">GodMod</span>
+      <span class="pill">v2.0.0</span>
+    </a>
+    <nav class="links" id="nav-links" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="godmod_docs_website.html">Docs</a>
+      <a href="godmod_individual_website.html" class="on">Life Extension</a>
+      <a href="tutorial_uni.html">Tutorial</a>
+      <a href="godmod.html">Code</a>
     </nav>
-    <nav id="nav">
-        <img src="https://cdn.midjourney.com/fbfc26f2-dc0c-4dc3-811c-35482d029ae9/0_0.png" alt="GodMod Library Extension">
-        <h1 class="title">GodMod Library Documentation</h1>
-        <!-- Navigation content will be inserted here -->
-    </nav>
-    <main id="content">
-        <h1 id="GodMod Individual Beings Extension">Life Extension Documentation</h1>
+    <div class="actions">
+      <a class="btn ghost small" href="https://github.com/workszop/godmod">GitHub</a>
+      <button class="btn small" data-copy="pip install godmod">pip install godmod</button>
+      <button class="toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    </div>
+  </div>
+</header>
 
-<h1 id="Introduction">Introduction</h1>
+<main id="main">
+  <div class="doc">
+    <aside class="sidebar">
+      <input class="filt" type="search" data-filter placeholder="Filter classes…" aria-label="Filter">
+      <div class="grp">Sections</div>
+      <a href="#life-extension-documentation" data-name="Life Extension Documentation">Life Extension Documentation</a>
+      <a href="#introduction" data-name="Introduction">Introduction</a>
+      <a href="#installation" data-name="Installation">Installation</a>
+      <a href="#classes" data-name="Classes">Classes</a>
+      <a href="#usage-examples" data-name="Usage Examples">Usage Examples</a>
+      <a href="#integration-with-godmod" data-name="Integration with GodMod">Integration with GodMod</a>
+      <a href="#best-practices" data-name="Best Practices">Best Practices</a>
+      <a href="#troubleshooting" data-name="Troubleshooting">Troubleshooting</a>
+      <a href="#contributing" data-name="Contributing">Contributing</a>
+      <div class="grp">Classes</div>
+      <a href="#individual" data-name="Individual">Individual</a>
+      <a href="#individualmanager" data-name="IndividualManager">IndividualManager</a>
+      <a href="#lifesimulator" data-name="LifeSimulator">LifeSimulator</a>
+      <a href="#creating-and-managing-individuals" data-name="Creating and Managing Individuals">Creating and Managing Individuals</a>
+      <a href="#simulating-life-events" data-name="Simulating Life Events">Simulating Life Events</a>
+    </aside>
+    <article class="prose" id="content">
+
+        <h1 id="life-extension-documentation">Life Extension Documentation</h1>
+
+<h1 id="introduction">Introduction</h1>
 <p>The GodMod Individual Beings Extension is an add-on to the GodMod Library that allows for the creation and manipulation of individual entities within your simulated universes. This extension provides granular control over the lives of beings, including their luck, fate, skills, relationships, and life events.</p>
+<figure class="plate">
+  <img src="assets/img/godmod-frame-04.webp" alt="">
+  <figcaption><b>Individuals.</b> Each one gets their own luck, their own fate, and a very small daily chance of mortality.</figcaption>
+</figure>
+
 <p>With this extension, you can:
 - Create and manage individual beings of any species
 - Control the luck and fate of individuals
 - Manage skills and relationships
 - Simulate the passage of time and generate life events
 - Integrate individual-level control with universe-level manipulation</p>
-<h1 id="Installation">Installation</h1>
+<h1 id="installation">Installation</h1>
 <p>To use the GodMod Individual Beings Extension, ensure you have the main GodMod Library installed. Then, include the extension file in your project directory.</p>
-<pre class="codehilite"><code class="language-python">from godmod import *
-from godmod_individual_beings import Individual, IndividualManager, LifeSimulator
-</code></pre>
+<div class="code">
+  <button class="copy" type="button">copy</button>
+<pre>from godmod import *
+from godmod_individual_beings import Individual, IndividualManager, LifeSimulator</pre>
+</div>
 
-<h1 id="Classes">Classes</h1>
-<h3 id="Individual">Individual</h3>
+
+<h1 id="classes">Classes</h1>
+<h3 id="individual">Individual</h3>
 <p>The <code>Individual</code> class represents a single being in the universe.</p>
 <h4>Attributes:</h4>
 <ul>
@@ -161,7 +106,7 @@ from godmod_individual_beings import Individual, IndividualManager, LifeSimulato
 <li><code>add_life_event(event: str)</code>: Adds a life event to the individual's history</li>
 <li><code>die()</code>: Marks the individual as deceased</li>
 </ul>
-<h3 id="IndividualManager">IndividualManager</h3>
+<h3 id="individualmanager">IndividualManager</h3>
 <p>The <code>IndividualManager</code> class manages the creation and tracking of individuals in the universe.</p>
 <h4>Methods:</h4>
 <ul>
@@ -169,41 +114,46 @@ from godmod_individual_beings import Individual, IndividualManager, LifeSimulato
 <li><code>get_individual(name: str) -&gt; Individual</code>: Retrieves an individual by name</li>
 <li><code>remove_individual(name: str)</code>: Removes an individual from the universe</li>
 </ul>
-<h3 id="LifeSimulator">LifeSimulator</h3>
+<h3 id="lifesimulator">LifeSimulator</h3>
 <p>The <code>LifeSimulator</code> class provides methods to simulate the passage of time and generate life events for individuals.</p>
 <h4>Methods:</h4>
 <ul>
 <li><code>simulate_day(individual: Individual)</code>: Simulates a day in the life of an individual, potentially triggering events based on luck, fate, and random chance</li>
 </ul>
-<h1 id="Usage Examples">Usage Examples</h1>
-<h3 id="Creating and Managing Individuals">Creating and Managing Individuals</h3>
-<pre class="codehilite"><code class="language-python">manager = IndividualManager()
+<h1 id="usage-examples">Usage Examples</h1>
+<h3 id="creating-and-managing-individuals">Creating and Managing Individuals</h3>
+<div class="code">
+  <button class="copy" type="button">copy</button>
+<pre>manager = IndividualManager()
 
 # Create individuals
-alice = manager.create_individual(&quot;Alice&quot;, &quot;Human&quot;, datetime(2000, 1, 1))
-bob = manager.create_individual(&quot;Bob&quot;, &quot;Human&quot;, datetime(1995, 5, 15))
+alice = manager.create_individual("Alice", "Human", datetime(2000, 1, 1))
+bob = manager.create_individual("Bob", "Human", datetime(1995, 5, 15))
 
 # Set attributes
 alice.set_luck(75)
-bob.add_fate_event(&quot;Becomes a famous chef&quot;, 35)
+bob.add_fate_event("Becomes a famous chef", 35)
 
 # Add skills
-alice.add_skill(&quot;Programming&quot;, 5)
-bob.add_skill(&quot;Cooking&quot;, 8)
+alice.add_skill("Programming", 5)
+bob.add_skill("Cooking", 8)
 
 # Create relationships
-alice.add_relationship(bob, &quot;Friend&quot;)
-bob.add_relationship(alice, &quot;Friend&quot;)
+alice.add_relationship(bob, "Friend")
+bob.add_relationship(alice, "Friend")
 
 # Retrieve an individual
-retrieved_alice = manager.get_individual(&quot;Alice&quot;)
+retrieved_alice = manager.get_individual("Alice")
 
 # Remove an individual
-manager.remove_individual(&quot;Bob&quot;)
-</code></pre>
+manager.remove_individual("Bob")</pre>
+</div>
 
-<h3 id="Simulating Life Events">Simulating Life Events</h3>
-<pre class="codehilite"><code class="language-python">simulator = LifeSimulator()
+
+<h3 id="simulating-life-events">Simulating Life Events</h3>
+<div class="code">
+  <button class="copy" type="button">copy</button>
+<pre>simulator = LifeSimulator()
 
 # Simulate a day in Alice's life
 simulator.simulate_day(alice)
@@ -213,17 +163,20 @@ for _ in range(365):
     simulator.simulate_day(alice)
 
 # Check Alice's life events
-print(alice.life_events)
-</code></pre>
+print(alice.life_events)</pre>
+</div>
 
-<h1 id="Integration with GodMod">Integration with GodMod</h1>
+
+<h1 id="integration-with-godmod">Integration with GodMod</h1>
 <p>The Individual Beings Extension can be integrated with other GodMod modules to create more complex and interesting scenarios:</p>
-<pre class="codehilite"><code class="language-python">from godmod import Universe, CelestialBody, Weather
+<div class="code">
+  <button class="copy" type="button">copy</button>
+<pre>from godmod import Universe, CelestialBody, Weather
 from godmod_individual_beings import Individual, IndividualManager, LifeSimulator
 
 # Create a universe and a planet
-universe = Universe(&quot;MyUniverse&quot;)
-earth = CelestialBody(&quot;Earth&quot;, &quot;planet&quot;)
+universe = Universe("MyUniverse")
+earth = CelestialBody("Earth", "planet")
 universe.add_body(earth)
 
 # Create weather on the planet
@@ -231,17 +184,18 @@ weather = Weather(earth)
 
 # Create individuals on the planet
 manager = IndividualManager()
-alice = manager.create_individual(&quot;Alice&quot;, &quot;Human&quot;, datetime(2000, 1, 1))
+alice = manager.create_individual("Alice", "Human", datetime(2000, 1, 1))
 
 # Simulate a day with weather events
 weather.set_rain(duration=60)
 LifeSimulator.simulate_day(alice)
 
 # Alice's life events might now include weather-related incidents
-print(alice.life_events)
-</code></pre>
+print(alice.life_events)</pre>
+</div>
 
-<h1 id="Best Practices">Best Practices</h1>
+
+<h1 id="best-practices">Best Practices</h1>
 <ol>
 <li>
 <p><strong>Memory Management</strong>: When dealing with large numbers of individuals, be mindful of memory usage. Remove individuals from the <code>IndividualManager</code> when they are no longer needed.</p>
@@ -259,45 +213,70 @@ print(alice.life_events)
 <p><strong>Customization</strong>: Extend the <code>Individual</code> class to add more attributes or methods specific to your simulation needs.</p>
 </li>
 </ol>
-<h1 id="Troubleshooting">Troubleshooting</h1>
+<h1 id="troubleshooting">Troubleshooting</h1>
 <ul>
 <li><strong>High Memory Usage</strong>: If you're experiencing high memory usage, ensure you're removing unnecessary individuals and not creating too many instances.</li>
 <li><strong>Unrealistic Simulations</strong>: If simulations seem unrealistic, review the probabilities in the <code>LifeSimulator.simulate_day()</code> method and adjust as needed.</li>
 <li><strong>Errors in Relationship Management</strong>: Ensure that when you remove an individual, you also update the relationships of other individuals who were connected to them.</li>
 </ul>
-<h1 id="Contributing">Contributing</h1>
+<h1 id="contributing">Contributing</h1>
 <p>Contributions to the GodMod Individual Beings Extension are welcome! Please submit pull requests with any enhancements, bug fixes, or documentation improvements.</p>
 <p>When contributing, please:
 - Follow the existing code style
 - Add unit tests for new functionality
 - Update the documentation to reflect your changes</p>
 <p>Remember, with great power comes great responsibility. Use your godlike powers wisely, and have fun shaping the destinies of your digital denizens!</p>
-    </main>
+    
+    </article>
+    <nav class="toc" aria-label="On this page">
+      <div class="grp">On this page</div>
+      <a href="#life-extension-documentation">Life Extension Documentation</a>
+      <a href="#introduction">Introduction</a>
+      <a href="#installation">Installation</a>
+      <a href="#classes">Classes</a>
+      <a href="#usage-examples">Usage Examples</a>
+      <a href="#integration-with-godmod">Integration with GodMod</a>
+      <a href="#best-practices">Best Practices</a>
+      <a href="#troubleshooting">Troubleshooting</a>
+      <a href="#contributing">Contributing</a>
+      <a href="#individual">Individual</a>
+      <a href="#individualmanager">IndividualManager</a>
+      <a href="#lifesimulator">LifeSimulator</a>
+      <a href="#creating-and-managing-individuals">Creating and Managing Individuals</a>
+      <a href="#simulating-life-events">Simulating Life Events</a>
+    </nav>
+  </div>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4>Documentation</h4>
+        <a href="index.html#story">The God Machine</a>
+        <a href="godmod_docs_website.html">GodMod library</a>
+        <a href="godmod_individual_website.html">Life Extension</a>
+        <a href="tutorial_uni.html">Tutorial</a>
+        <a href="godmod_docs_website.html#faq">FAQ</a>
+      </div>
+      <div>
+        <h4>Code</h4>
+        <a href="godmod.html">godmod.py</a>
+        <a href="individual.html">Life Extension source</a>
+        <a href="https://github.com/workszop/godmod">GodMod repository</a>
+      </div>
+      <div>
+        <h4>Project</h4>
+        <a href="godmod_docs_website.html#license">License (MIT)</a>
+        <a href="godmod_docs_website.html#contributing">Contributing</a>
+        <a href="https://github.com/workszop/godmod/issues">Issues</a>
+      </div>
+    </div>
+    <div class="base">
+      <span>MIT © 2024 GodMod contributors</span>
+      <span>Artwork: <code>godmod.gif</code> — 18 frames, shipped with the repository</span>
+    </div>
+  </div>
+</footer>
 
-    <script>
-        // Highlight.js initialization
-        hljs.highlightAll();
-
-        // Function to create the navigation menu
-        function createNavMenu() {
-            const nav = document.getElementById('nav');
-            const headers = document.querySelectorAll('#content h1');
-            const ul = document.createElement('ul');
-
-            headers.forEach(header => {
-                const li = document.createElement('li');
-                const a = document.createElement('a');
-                a.textContent = header.textContent;
-                a.href = `#${header.id}`;
-                li.appendChild(a);
-                ul.appendChild(li);
-            });
-
-            nav.appendChild(ul);
-        }
-
-        // Call the function after the content is loaded
-        window.addEventListener('load', createNavMenu);
-    </script>
 </body>
 </html>

@@ -1,129 +1,70 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creating an Alien Universe Tutorial</title>
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --accent-color: #e74c3c;
-            --background-color: #ecf0f1;
-            --text-color: #2c3e50;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            color: var(--text-color);
-            background-color: var(--background-color);
-        }
-        #top-nav {
-            background-color: var(--primary-color);
-            padding: 10px;
-            text-align: center;
-        }
-        #top-nav a {
-            color: white;
-            text-decoration: none;
-            padding: 5px 10px;
-            margin: 0 5px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        #top-nav a:hover {
-            background-color: var(--accent-color);
-        }
-        #nav {
-            width: 250px;
-            height: 100vh;
-            overflow-y: auto;
-            background-color: var(--secondary-color);
-            padding: 20px;
-            position: fixed;
-            box-sizing: border-box;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            top: 0;
-        }
-        #nav img {
-            max-width: 80%;
-            height: auto;
-            margin-bottom: 20px;
-            border-radius: 10px;
-        }
-        #content {
-            margin-left: 250px;
-            padding: 20px;
-            flex-grow: 1;
-            max-width: calc(100% - 250px);
-            box-sizing: border-box;
-            margin-top: 50px;
-        }
-        h1, h2, h3 {
-            color: var(--accent-color);
-        }
-        h1.title {
-            font-size: 1.5em;
-            margin: 10px 0;
-            text-align: center;
-            color: white;
-        }
-        a {
-            color: var(--accent-color);
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        pre {
-            background-color: var(--secondary-color);
-            color: #abb2bf;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-        }
-        code {
-            font-family: 'Courier New', Courier, monospace;
-        }
-        #nav ul {
-            list-style-type: none;
-            padding: 0;
-            width: 100%;
-        }
-        #nav li {
-            margin-bottom: 10px;
-        }
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/atom-one-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tutorial — creating an alien universe with GodMod</title>
+<meta name="description" content="Step-by-step tutorial: build an alien universe with GodMod and the Individual Beings extension — planets, weather, alien species and simulated lives.">
+<link rel="icon" href="favicon.ico">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script>
 </head>
 <body>
-    <nav id="top-nav">
-        <a href="index.html">Home</a>
-        <a href="godmod_docs_website.html">GodMod Docs</a>
-        <a href="godmod_individual_website.html">Life Extension Docs</a>
-        <a href="tutorial_uni.html">Tutorial</a>
-        <a href="godmod.html">GodMod Code</a>
-        <a href="individual.html">Extension Code</a>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav">
+  <div class="inner">
+    <a class="brand" href="index.html">
+      <img src="favicon.ico" alt="">
+      <span class="name">GodMod</span>
+      <span class="pill">v2.0.0</span>
+    </a>
+    <nav class="links" id="nav-links" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="godmod_docs_website.html">Docs</a>
+      <a href="godmod_individual_website.html">Life Extension</a>
+      <a href="tutorial_uni.html" class="on">Tutorial</a>
+      <a href="godmod.html">Code</a>
     </nav>
-    <nav id="nav">
-        <img src="https://cdn.midjourney.com/8dfa5738-e55b-4988-ac93-d10a42850878/0_3.png" alt="Alien Universe">
-        <h1 class="title">Alien Universe Tutorial</h1>
-        <!-- Navigation content will be inserted here -->
-    </nav>
-    <main id="content">
+    <div class="actions">
+      <a class="btn ghost small" href="https://github.com/workszop/godmod">GitHub</a>
+      <button class="btn small" data-copy="pip install godmod">pip install godmod</button>
+      <button class="toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="doc">
+    <aside class="sidebar">
+      <input class="filt" type="search" data-filter placeholder="Filter steps…" aria-label="Filter">
+      <div class="grp">Sections</div>
+      <a href="#creating-an-alien-universe" data-name="Creating an Alien Universe">Creating an Alien Universe</a>
+      <a href="#step-1-initialize-the-universe" data-name="Step 1: Initialize the Universe">Step 1: Initialize the Universe</a>
+      <a href="#step-2-create-weather-and-environmental-conditions" data-name="Step 2: Create Weather and Environmental Conditions">Step 2: Create Weather and Environmental Conditions</a>
+      <a href="#step-3-introduce-alien-life-forms" data-name="Step 3: Introduce Alien Life Forms">Step 3: Introduce Alien Life Forms</a>
+      <a href="#step-4-simulate-life-events" data-name="Step 4: Simulate Life Events">Step 4: Simulate Life Events</a>
+      <a href="#step-5-integrate-with-universe-level-events" data-name="Step 5: Integrate with Universe-Level Events">Step 5: Integrate with Universe-Level Events</a>
+      <a href="#step-6-manage-multiple-species-and-environments" data-name="Step 6: Manage Multiple Species and Environments">Step 6: Manage Multiple Species and Environments</a>
+      <a href="#conclusion" data-name="Conclusion">Conclusion</a>
+      <div class="grp">Steps</div>
+      <a href="#example-alien-species-zephyrians" data-name="Example Alien Species: Zephyrians">Example Alien Species: Zephyrians</a>
+      <a href="#example-alien-species-aquarians" data-name="Example Alien Species: Aquarians">Example Alien Species: Aquarians</a>
+    </aside>
+    <article class="prose" id="content">
+
         <h1 id="creating-an-alien-universe">Creating an Alien Universe</h1>
         <p>This tutorial will guide you through the process of creating an alien universe with unique life forms using the GodMod Library and its Individual Beings Extension.</p>
+<figure class="plate">
+  <img src="assets/img/godmod-frame-16.webp" alt="">
+  <figcaption><b>Somewhere in the spiral</b> a Zephyrian is having a day, and the <code>LifeSimulator</code> is deciding how it went.</figcaption>
+</figure>
+
 
         <h2 id="step-1-initialize-the-universe">Step 1: Initialize the Universe</h2>
         <p>First, we'll initialize the universe and create a planet that will host our alien life forms.</p>
-        <pre><code class="language-python">
+        <div class="code">
+  <button class="copy" type="button">copy</button>
+<pre>
 import godmod as gm
 from godmod_individual_beings import Individual, IndividualManager, LifeSimulator
 from datetime import datetime
@@ -137,24 +78,32 @@ universe.add_body(planet)
 
 # Set the planet's orbit
 planet.set_orbit('AlienSun', 1.5e11)  # 1.5e11 meters (approximately 1 AU)
-        </code></pre>
+        </pre>
+</div>
+
 
         <h2 id="step-2-create-weather-and-environmental-conditions">Step 2: Create Weather and Environmental Conditions</h2>
         <p>We'll define the weather and environmental conditions on our planet to make it unique and suitable for our alien life forms.</p>
-        <pre><code class="language-python">
+        <div class="code">
+  <button class="copy" type="button">copy</button>
+<pre>
 # Create and control weather on the planet
 weather = gm.Weather(planet)
 weather.set_temperature(value=25)  # Set a default temperature
 weather.set_rain(duration=60)      # Rain for 60 minutes
 weather.set_sun(duration=120)      # Sunny for 120 minutes
-        </code></pre>
+        </pre>
+</div>
+
 
         <h2 id="step-3-introduce-alien-life-forms">Step 3: Introduce Alien Life Forms</h2>
         <p>We'll create a variety of alien species with distinct attributes and abilities.</p>
 
-        <h3>Example Alien Species: Zephyrians</h3>
+        <h3 id="example-alien-species-zephyrians">Example Alien Species: Zephyrians</h3>
         <p><strong>Zephyrians</strong> are a highly intelligent species with advanced telepathic abilities.</p>
-        <pre><code class="language-python">
+        <div class="code">
+  <button class="copy" type="button">copy</button>
+<pre>
 # Initialize the individual manager
 manager = IndividualManager()
 
@@ -173,11 +122,15 @@ lyra.add_skill("Telepathy", 8)
 # Establish a relationship
 zephyr.add_relationship(lyra, "Colleague")
 lyra.add_relationship(zephyr, "Colleague")
-        </code></pre>
+        </pre>
+</div>
 
-        <h3>Example Alien Species: Aquarians</h3>
+
+        <h3 id="example-alien-species-aquarians">Example Alien Species: Aquarians</h3>
         <p><strong>Aquarians</strong> are aquatic beings with exceptional adaptability and survival skills.</p>
-        <pre><code class="language-python">
+        <div class="code">
+  <button class="copy" type="button">copy</button>
+<pre>
 # Create an Aquarian individual
 aqua = manager.create_individual(name="Aqua", species="Aquarian", birthdate=datetime(3020, 3, 10))
 aqua.set_luck(60)
@@ -193,11 +146,15 @@ coral.add_skill("Medicine", 7)
 # Establish a relationship
 aqua.add_relationship(coral, "Sibling")
 coral.add_relationship(aqua, "Sibling")
-        </code></pre>
+        </pre>
+</div>
+
 
         <h2 id="step-4-simulate-life-events">Step 4: Simulate Life Events</h2>
         <p>Using the <code>LifeSimulator</code> class, we can simulate daily events for our alien individuals.</p>
-        <pre><code class="language-python">
+        <div class="code">
+  <button class="copy" type="button">copy</button>
+<pre>
 # Initialize the life simulator
 simulator = LifeSimulator()
 
@@ -211,11 +168,15 @@ for _ in range(365):
 # Check life events
 print(zephyr.life_events)
 print(aqua.life_events)
-        </code></pre>
+        </pre>
+</div>
+
 
         <h2 id="step-5-integrate-with-universe-level-events">Step 5: Integrate with Universe-Level Events</h2>
         <p>Integrate individual life events with universe-level events for a cohesive and dynamic simulation.</p>
-        <pre><code class="language-python">
+        <div class="code">
+  <button class="copy" type="button">copy</button>
+<pre>
 # Create a cosmic event
 cosmic_event = gm.CosmicEvent()
 cosmic_event.trigger_supernova('AlienStar')
@@ -230,11 +191,15 @@ simulator.simulate_day(zephyr)  # Simulate Zephyr's day during the event
 
 # Check life events after the cosmic event
 print(zephyr.life_events)
-        </code></pre>
+        </pre>
+</div>
+
 
         <h2 id="step-6-manage-multiple-species-and-environments">Step 6: Manage Multiple Species and Environments</h2>
         <p>Create different environments on the planet to host various alien species and manage interactions between them.</p>
-        <pre><code class="language-python">
+        <div class="code">
+  <button class="copy" type="button">copy</button>
+<pre>
 # Introduce species into different ecosystems
 ecosystem = gm.Ecosystem(planet)
 ecosystem.introduce_species('Zephyrian')
@@ -242,36 +207,59 @@ ecosystem.introduce_species('Aquarian')
 
 # Manage pollution levels
 ecosystem.control_pollution(level=0.2)  # Low pollution for a healthy ecosystem
-        </code></pre>
+        </pre>
+</div>
+
 
         <h2 id="conclusion">Conclusion</h2>
         <p>By following these steps, we have created a rich, dynamic alien universe with diverse life forms and interactive environments. The GodMod Library and Individual Beings Extension offer powerful tools for simulating complex scenarios and life events, allowing for a detailed and immersive simulation experience.</p>
-    </main>
+    
+    </article>
+    <nav class="toc" aria-label="On this page">
+      <div class="grp">On this page</div>
+      <a href="#creating-an-alien-universe">Creating an Alien Universe</a>
+      <a href="#step-1-initialize-the-universe">Step 1: Initialize the Universe</a>
+      <a href="#step-2-create-weather-and-environmental-conditions">Step 2: Create Weather and Environmental Conditions</a>
+      <a href="#step-3-introduce-alien-life-forms">Step 3: Introduce Alien Life Forms</a>
+      <a href="#step-4-simulate-life-events">Step 4: Simulate Life Events</a>
+      <a href="#step-5-integrate-with-universe-level-events">Step 5: Integrate with Universe-Level Events</a>
+      <a href="#step-6-manage-multiple-species-and-environments">Step 6: Manage Multiple Species and Environments</a>
+      <a href="#conclusion">Conclusion</a>
+      <a href="#example-alien-species-zephyrians">Example Alien Species: Zephyrians</a>
+      <a href="#example-alien-species-aquarians">Example Alien Species: Aquarians</a>
+    </nav>
+  </div>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4>Documentation</h4>
+        <a href="index.html#story">The God Machine</a>
+        <a href="godmod_docs_website.html">GodMod library</a>
+        <a href="godmod_individual_website.html">Life Extension</a>
+        <a href="tutorial_uni.html">Tutorial</a>
+        <a href="godmod_docs_website.html#faq">FAQ</a>
+      </div>
+      <div>
+        <h4>Code</h4>
+        <a href="godmod.html">godmod.py</a>
+        <a href="individual.html">Life Extension source</a>
+        <a href="https://github.com/workszop/godmod">GodMod repository</a>
+      </div>
+      <div>
+        <h4>Project</h4>
+        <a href="godmod_docs_website.html#license">License (MIT)</a>
+        <a href="godmod_docs_website.html#contributing">Contributing</a>
+        <a href="https://github.com/workszop/godmod/issues">Issues</a>
+      </div>
+    </div>
+    <div class="base">
+      <span>MIT © 2024 GodMod contributors</span>
+      <span>Artwork: <code>godmod.gif</code> — 18 frames, shipped with the repository</span>
+    </div>
+  </div>
+</footer>
 
-    <script>
-        // Highlight.js initialization
-        hljs.highlightAll();
-
-        // Function to create the navigation menu
-        function createNavMenu() {
-            const nav = document.getElementById('nav');
-            const headers = document.querySelectorAll('#content h1, #content h2');
-            const ul = document.createElement('ul');
-
-            headers.forEach(header => {
-                const li = document.createElement('li');
-                const a = document.createElement('a');
-                a.textContent = header.textContent;
-                a.href = `#${header.id}`;
-                li.appendChild(a);
-                ul.appendChild(li);
-            });
-
-            nav.appendChild(ul);
-        }
-
-        // Call the function after the content is loaded
-        window.addEventListener('load', createNavMenu);
-    </script>
 </body>
 </html>

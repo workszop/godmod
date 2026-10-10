@@ -1,67 +1,54 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GodMod 2.0 Code Display</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #282c34;
-            color: #abb2bf;
-            line-height: 1.6;
-            padding: 20px;
-            margin: 0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #21252b;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #61afef;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        pre {
-            margin: 0;
-            padding: 20px;
-            border-radius: 4px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        code {
-            font-family: 'Courier New', Courier, monospace;
-        }
-        .back-button {
-            display: inline-block;
-            background-color: #61afef;
-            color: #282c34;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            transition: background-color 0.3s ease;
-        }
-        .back-button:hover {
-            background-color: #528bbc;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>godmod_individual_beings.py — GodMod source</title>
+<meta name="description" content="The Individual Beings extension — individuals, their luck, fate, skills, relationships and simulated days.">
+<link rel="icon" href="favicon.ico">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script>
 </head>
 <body>
-    <div class="container">
-        <a href="index.html" class="back-button">Back to Index</a>
-        <h1>GodMod 2.0 Python Code</h1>
-        <pre><code class="language-python">
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav">
+  <div class="inner">
+    <a class="brand" href="index.html">
+      <img src="favicon.ico" alt="">
+      <span class="name">GodMod</span>
+      <span class="pill">v2.0.0</span>
+    </a>
+    <nav class="links" id="nav-links" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="godmod_docs_website.html">Docs</a>
+      <a href="godmod_individual_website.html">Life Extension</a>
+      <a href="tutorial_uni.html">Tutorial</a>
+      <a href="godmod.html" class="on">Code</a>
+    </nav>
+    <div class="actions">
+      <a class="btn ghost small" href="https://github.com/workszop/godmod">GitHub</a>
+      <button class="btn small" data-copy="pip install godmod">pip install godmod</button>
+      <button class="toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    </div>
+  </div>
+</header>
 
-import random
+<main id="main">
+  <div class="viewer">
+    <div class="head">
+      <div>
+        <h1>godmod_individual_beings.py</h1>
+        <p>The Individual Beings extension — individuals, their luck, fate, skills, relationships and simulated days.</p>
+      </div>
+      <div class="spacer">
+        <a class="btn ghost small" href="godmod_individual_beings.py">Download godmod_individual_beings.py</a>
+        <a class="btn ghost small" href="https://github.com/workszop/godmod/blob/main/godmod_individual_beings.py">View on GitHub</a>
+      </div>
+    </div>
+    <div class="callout info"><span class="ic">🐍</span><p>Save this as <code>godmod_individual_beings.py</code> beside <code>godmod.py</code>, or grab it from the repository: <a href="godmod_individual_beings.py">godmod_individual_beings.py</a>. It is what the <a href="godmod_individual_website.html">Life Extension docs</a> import.</p></div>
+    <div class="code">
+      <button class="copy" type="button">copy</button>
+<pre>import random
 from typing import List, Dict, Any
 from datetime import datetime, timedelta
 
@@ -78,38 +65,38 @@ class Individual:
         self.is_alive = True
         print(f"👤 {name}, a {species}, has entered the universe. May their story be interesting!")
 
-    def age(self) -> int:
+    def age(self) -&gt; int:
         current_date = datetime.now()
         return (current_date - self.birthdate).days // 365
 
-    def set_luck(self, value: int) -> None:
+    def set_luck(self, value: int) -&gt; None:
         self.luck = max(0, min(100, value))  # Ensure luck stays between 0 and 100
         print(f"🍀 {self.name}'s luck has been set to {self.luck}. Let's see how it plays out!")
 
-    def add_fate_event(self, event: str, age: int) -> None:
+    def add_fate_event(self, event: str, age: int) -&gt; None:
         self.fate[age] = event
         print(f"🔮 A new fate has been written for {self.name}: At age {age}, {event}")
 
-    def add_skill(self, skill: str, level: int) -> None:
+    def add_skill(self, skill: str, level: int) -&gt; None:
         self.skills[skill] = level
         print(f"🌟 {self.name} has gained the skill: {skill} at level {level}")
 
-    def improve_skill(self, skill: str, improvement: int) -> None:
+    def improve_skill(self, skill: str, improvement: int) -&gt; None:
         if skill in self.skills:
             self.skills[skill] += improvement
             print(f"📈 {self.name}'s {skill} skill has improved by {improvement} to level {self.skills[skill]}")
         else:
             print(f"❓ {self.name} doesn't have the {skill} skill yet. Try adding it first!")
 
-    def add_relationship(self, other: 'Individual', relationship_type: str) -> None:
+    def add_relationship(self, other: 'Individual', relationship_type: str) -&gt; None:
         self.relationships[other.name] = relationship_type
         print(f"❤️ {self.name} now has a {relationship_type} relationship with {other.name}")
 
-    def add_life_event(self, event: str) -> None:
+    def add_life_event(self, event: str) -&gt; None:
         self.life_events.append(event)
         print(f"📅 New life event for {self.name}: {event}")
 
-    def die(self) -> None:
+    def die(self) -&gt; None:
         self.is_alive = False
         print(f"☠️ {self.name} has shuffled off this mortal coil. Their story in this universe has ended.")
 
@@ -117,15 +104,15 @@ class IndividualManager:
     def __init__(self):
         self.individuals: Dict[str, Individual] = {}
 
-    def create_individual(self, name: str, species: str, birthdate: datetime) -> Individual:
+    def create_individual(self, name: str, species: str, birthdate: datetime) -&gt; Individual:
         individual = Individual(name, species, birthdate)
         self.individuals[name] = individual
         return individual
 
-    def get_individual(self, name: str) -> Individual:
+    def get_individual(self, name: str) -&gt; Individual:
         return self.individuals.get(name)
 
-    def remove_individual(self, name: str) -> None:
+    def remove_individual(self, name: str) -&gt; None:
         if name in self.individuals:
             del self.individuals[name]
             print(f"🚫 {name} has been removed from the universe. Hope it wasn't anything personal!")
@@ -134,14 +121,14 @@ class IndividualManager:
 
 class LifeSimulator:
     @staticmethod
-    def simulate_day(individual: Individual) -> None:
+    def simulate_day(individual: Individual) -&gt; None:
         # Check for fate events
         age = individual.age()
         if age in individual.fate:
             individual.add_life_event(individual.fate[age])
 
         # Random events based on luck
-        if random.randint(1, 100) <= individual.luck:
+        if random.randint(1, 100) &lt;= individual.luck:
             lucky_events = [
                 "Found a four-leaf clover",
                 "Won a small lottery",
@@ -152,13 +139,13 @@ class LifeSimulator:
             individual.add_life_event(random.choice(lucky_events))
         
         # Skill improvements
-        if random.random() < 0.1:  # 10% chance of skill improvement each day
+        if random.random() &lt; 0.1:  # 10% chance of skill improvement each day
             if individual.skills:
                 skill = random.choice(list(individual.skills.keys()))
                 individual.improve_skill(skill, 1)
 
         # Relationship events
-        if individual.relationships and random.random() < 0.05:  # 5% chance of relationship event
+        if individual.relationships and random.random() &lt; 0.05:  # 5% chance of relationship event
             person = random.choice(list(individual.relationships.keys()))
             relationship_events = [
                 f"Had a great day with {person}",
@@ -169,7 +156,7 @@ class LifeSimulator:
             individual.add_life_event(random.choice(relationship_events))
 
         # Small chance of mortality (0.01% per day)
-        if random.random() < 0.0001:
+        if random.random() &lt; 0.0001:
             individual.die()
 
 def main():
@@ -221,4 +208,40 @@ def main():
     print("Remember, with great power comes great responsibility... and endless entertainment!")
 
 if __name__ == "__main__":
-    main()
+    main()</pre>
+    </div>
+  </div>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <h4>Documentation</h4>
+        <a href="index.html#story">The God Machine</a>
+        <a href="godmod_docs_website.html">GodMod library</a>
+        <a href="godmod_individual_website.html">Life Extension</a>
+        <a href="tutorial_uni.html">Tutorial</a>
+        <a href="godmod_docs_website.html#faq">FAQ</a>
+      </div>
+      <div>
+        <h4>Code</h4>
+        <a href="godmod.html">godmod.py</a>
+        <a href="individual.html">Life Extension source</a>
+        <a href="https://github.com/workszop/godmod">GitHub repository</a>
+      </div>
+      <div>
+        <h4>Project</h4>
+        <a href="godmod_docs_website.html#license">License (MIT)</a>
+        <a href="godmod_docs_website.html#contributing">Contributing</a>
+        <a href="https://github.com/workszop/godmod/issues">Issues</a>
+      </div>
+    </div>
+    <div class="base">
+      <span>MIT © 2024 GodMod contributors</span>
+      <span>Artwork: <code>godmod.gif</code> — 18 frames, shipped with the repository</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
